@@ -1,0 +1,990 @@
+{
+  "datasets": {
+    "bot_repository_combined__nodes": {
+      "artefact": null,
+      "columns": [
+        "user_id",
+        "label",
+        "screen_name",
+        "followers_count",
+        "following_count",
+        "statuses_count",
+        "account_age_days",
+        "verified",
+        "description",
+        "split",
+        "source_dataset"
+      ],
+      "env": {
+        "pandas": "3.0.5",
+        "platform": "Windows-11",
+        "python": "3.13.14"
+      },
+      "era": "legacy",
+      "label_balance": {
+        "0": 24069,
+        "1": 70821
+      },
+      "name": "bot_repository_combined__nodes",
+      "note": "Union of 11 OSoMe Bot Repository corpora (botrepo_botometer_feedback_2019, botrepo_botwiki_2019, botrepo_celebrity_2019, botrepo_cresci_rtbust_2019, botrepo_cresci_stock_2018, botrepo_gilani_2017, botrepo_midterm_2018, botrepo_political_bots_2019, botrepo_pronbots_2019, botrepo_vendor_purchased_2019, botrepo_verified_2019); 253 duplicate user_ids dropped. PROFILE FEATURES ONLY \u2014 no edges, no post timeline. per-source counts: {'botrepo_midterm_2018': 50521, 'botrepo_pronbots_2019': 17882, 'botrepo_cresci_stock_2018': 13275, 'botrepo_celebrity_2019': 5916, 'botrepo_gilani_2017': 2326, 'botrepo_verified_2019': 1932, 'botrepo_vendor_purchased_2019': 1070, 'botrepo_botwiki_2019': 695, 'botrepo_cresci_rtbust_2019': 693, 'botrepo_botometer_feedback_2019': 518, 'botrepo_political_bots_2019': 62}",
+      "provenance": "REAL",
+      "retrieved_at": "2026-09-09T15:37:25+00:00",
+      "rows": 94890,
+      "sha256": "4e06a9cada3e6f45c990a7cd3248b66ae998428625dae89357e9e0baf7c7e4f2",
+      "source": "combined:11 corpora"
+    },
+    "botrepo_astroturf__nodes": {
+      "artefact": null,
+      "columns": [
+        "user_id",
+        "label",
+        "screen_name",
+        "followers_count",
+        "following_count",
+        "statuses_count",
+        "account_age_days",
+        "verified",
+        "description",
+        "split"
+      ],
+      "env": {
+        "pandas": "3.0.5",
+        "platform": "Windows-11",
+        "python": "3.13.14"
+      },
+      "era": "unusable",
+      "label_balance": {
+        "0": 220,
+        "1": 56
+      },
+      "name": "botrepo_astroturf__nodes",
+      "note": "edges=1711 posts=3796",
+      "provenance": "SYNTHETIC_FALLBACK",
+      "retrieved_at": "2026-09-09T15:44:08+00:00",
+      "rows": 276,
+      "sha256": "c11d352ecb962fd974279036f3c6bc41aaedc7aa48590537ff958eda870a9019",
+      "source": "FALLBACK USED. Attempts -> local: no user-object file \u2014 this release is account IDs and labels only, so there is nothing to featurise without Twitter API hydration | huggingface: strategy 'huggingface' not applicable to graph data | kaggle: no kaggle_dataset configured"
+    },
+    "botrepo_botometer_feedback_2019__nodes": {
+      "artefact": null,
+      "columns": [
+        "user_id",
+        "label",
+        "screen_name",
+        "followers_count",
+        "following_count",
+        "statuses_count",
+        "account_age_days",
+        "verified",
+        "description",
+        "split"
+      ],
+      "env": {
+        "pandas": "3.0.5",
+        "platform": "Windows-11",
+        "python": "3.13.14"
+      },
+      "era": "legacy",
+      "label_balance": {
+        "0": 380,
+        "1": 138
+      },
+      "name": "botrepo_botometer_feedback_2019__nodes",
+      "note": "edges=0 posts=0",
+      "provenance": "REAL",
+      "retrieved_at": "2026-09-09T15:41:46+00:00",
+      "rows": 518,
+      "sha256": "c687ca7b383b505bb412618adf079a726fef19278b154fe5bbbcb8050f1f99d8",
+      "source": "local:botometer-feedback-2019 (3 files); PROFILE FEATURES ONLY \u2014 this release ships no edge list and no tweet text, so synchrony, burstiness and content-reuse are all zero. 518 accounts, label balance {0: 380, 1: 138}."
+    },
+    "botrepo_botwiki_2019__nodes": {
+      "artefact": null,
+      "columns": [
+        "user_id",
+        "label",
+        "screen_name",
+        "followers_count",
+        "following_count",
+        "statuses_count",
+        "account_age_days",
+        "verified",
+        "description",
+        "split"
+      ],
+      "env": {
+        "pandas": "3.0.5",
+        "platform": "Windows-11",
+        "python": "3.13.14"
+      },
+      "era": "legacy",
+      "label_balance": {
+        "1": 698
+      },
+      "name": "botrepo_botwiki_2019__nodes",
+      "note": "edges=0 posts=0",
+      "provenance": "REAL",
+      "retrieved_at": "2026-09-09T15:41:46+00:00",
+      "rows": 698,
+      "sha256": "e9f4af5fe1290465e83cb0b6da637c47258391ba30291253dfa1941fea475cf3",
+      "source": "local:botwiki-2019 (3 files); PROFILE FEATURES ONLY \u2014 this release ships no edge list and no tweet text, so synchrony, burstiness and content-reuse are all zero. 698 accounts, label balance {1: 698}."
+    },
+    "botrepo_caverlee_2011__nodes": {
+      "artefact": null,
+      "columns": [
+        "user_id",
+        "label",
+        "screen_name",
+        "followers_count",
+        "following_count",
+        "statuses_count",
+        "account_age_days",
+        "verified",
+        "description",
+        "split"
+      ],
+      "env": {
+        "pandas": "3.0.5",
+        "platform": "Windows-11",
+        "python": "3.13.14"
+      },
+      "era": "unusable",
+      "label_balance": {
+        "0": 220,
+        "1": 56
+      },
+      "name": "botrepo_caverlee_2011__nodes",
+      "note": "edges=1711 posts=3796",
+      "provenance": "SYNTHETIC_FALLBACK",
+      "retrieved_at": "2026-09-09T15:44:20+00:00",
+      "rows": 276,
+      "sha256": "c11d352ecb962fd974279036f3c6bc41aaedc7aa48590537ff958eda870a9019",
+      "source": "FALLBACK USED. Attempts -> local: no <name>.tsv label file found | huggingface: strategy 'huggingface' not applicable to graph data | kaggle: no kaggle_dataset configured"
+    },
+    "botrepo_celebrity_2019__nodes": {
+      "artefact": null,
+      "columns": [
+        "user_id",
+        "label",
+        "screen_name",
+        "followers_count",
+        "following_count",
+        "statuses_count",
+        "account_age_days",
+        "verified",
+        "description",
+        "split"
+      ],
+      "env": {
+        "pandas": "3.0.5",
+        "platform": "Windows-11",
+        "python": "3.13.14"
+      },
+      "era": "legacy",
+      "label_balance": {
+        "0": 5918
+      },
+      "name": "botrepo_celebrity_2019__nodes",
+      "note": "edges=0 posts=0",
+      "provenance": "REAL",
+      "retrieved_at": "2026-09-09T15:41:49+00:00",
+      "rows": 5918,
+      "sha256": "915274c08482b189d05d36d288136f87698cd368d0063ca37d9f785f55f7ba39",
+      "source": "local:celebrity-2019 (3 files); PROFILE FEATURES ONLY \u2014 this release ships no edge list and no tweet text, so synchrony, burstiness and content-reuse are all zero. 5918 accounts, label balance {0: 5918}."
+    },
+    "botrepo_cresci_rtbust_2019__nodes": {
+      "artefact": null,
+      "columns": [
+        "user_id",
+        "label",
+        "screen_name",
+        "followers_count",
+        "following_count",
+        "statuses_count",
+        "account_age_days",
+        "verified",
+        "description",
+        "split"
+      ],
+      "env": {
+        "pandas": "3.0.5",
+        "platform": "Windows-11",
+        "python": "3.13.14"
+      },
+      "era": "legacy",
+      "label_balance": {
+        "0": 340,
+        "1": 353
+      },
+      "name": "botrepo_cresci_rtbust_2019__nodes",
+      "note": "edges=0 posts=0",
+      "provenance": "REAL",
+      "retrieved_at": "2026-09-09T15:41:50+00:00",
+      "rows": 693,
+      "sha256": "12d23a438a789eaf83cb1e5fa6fb5c8327aac29019e07ea4a6a5b09d6ca4b214",
+      "source": "local:cresci-rtbust-2019 (3 files); PROFILE FEATURES ONLY \u2014 this release ships no edge list and no tweet text, so synchrony, burstiness and content-reuse are all zero. 693 accounts, label balance {1: 353, 0: 340}."
+    },
+    "botrepo_cresci_stock_2018__nodes": {
+      "artefact": null,
+      "columns": [
+        "user_id",
+        "label",
+        "screen_name",
+        "followers_count",
+        "following_count",
+        "statuses_count",
+        "account_age_days",
+        "verified",
+        "description",
+        "split"
+      ],
+      "env": {
+        "pandas": "3.0.5",
+        "platform": "Windows-11",
+        "python": "3.13.14"
+      },
+      "era": "legacy",
+      "label_balance": {
+        "0": 6174,
+        "1": 7102
+      },
+      "name": "botrepo_cresci_stock_2018__nodes",
+      "note": "edges=0 posts=0",
+      "provenance": "REAL",
+      "retrieved_at": "2026-09-09T15:41:52+00:00",
+      "rows": 13276,
+      "sha256": "5578479b2b92b201421c6e8081f9d4e84996e81626a498395c3647f61244ac61",
+      "source": "local:cresci-stock-2018 (3 files); PROFILE FEATURES ONLY \u2014 this release ships no edge list and no tweet text, so synchrony, burstiness and content-reuse are all zero. 13276 accounts, label balance {1: 7102, 0: 6174}."
+    },
+    "botrepo_gilani_2017__nodes": {
+      "artefact": null,
+      "columns": [
+        "user_id",
+        "label",
+        "screen_name",
+        "followers_count",
+        "following_count",
+        "statuses_count",
+        "account_age_days",
+        "verified",
+        "description",
+        "split"
+      ],
+      "env": {
+        "pandas": "3.0.5",
+        "platform": "Windows-11",
+        "python": "3.13.14"
+      },
+      "era": "legacy",
+      "label_balance": {
+        "0": 1394,
+        "1": 1090
+      },
+      "name": "botrepo_gilani_2017__nodes",
+      "note": "edges=0 posts=0",
+      "provenance": "REAL",
+      "retrieved_at": "2026-09-09T15:41:53+00:00",
+      "rows": 2484,
+      "sha256": "c52ac909f9492e62cc21d18a2ce4c8d1dff894d35872b22f960645acc53d2664",
+      "source": "local:gilani-2017 (3 files); PROFILE FEATURES ONLY \u2014 this release ships no edge list and no tweet text, so synchrony, burstiness and content-reuse are all zero. 2484 accounts, label balance {0: 1394, 1: 1090}."
+    },
+    "botrepo_midterm_2018__nodes": {
+      "artefact": null,
+      "columns": [
+        "user_id",
+        "label",
+        "screen_name",
+        "followers_count",
+        "following_count",
+        "statuses_count",
+        "account_age_days",
+        "verified",
+        "description",
+        "split"
+      ],
+      "env": {
+        "pandas": "3.0.5",
+        "platform": "Windows-11",
+        "python": "3.13.14"
+      },
+      "era": "legacy",
+      "label_balance": {
+        "0": 8092,
+        "1": 42446
+      },
+      "name": "botrepo_midterm_2018__nodes",
+      "note": "edges=0 posts=0",
+      "provenance": "REAL",
+      "retrieved_at": "2026-09-09T15:41:59+00:00",
+      "rows": 50538,
+      "sha256": "596bb4b5f83304a2c33a9aa33d5e78e1be0140e9d3960702f061cc5298d507ea",
+      "source": "local:midterm-2018 (3 files); PROFILE FEATURES ONLY \u2014 this release ships no edge list and no tweet text, so synchrony, burstiness and content-reuse are all zero. 50538 accounts, label balance {1: 42446, 0: 8092}."
+    },
+    "botrepo_political_bots_2019__nodes": {
+      "artefact": null,
+      "columns": [
+        "user_id",
+        "label",
+        "screen_name",
+        "followers_count",
+        "following_count",
+        "statuses_count",
+        "account_age_days",
+        "verified",
+        "description",
+        "split"
+      ],
+      "env": {
+        "pandas": "3.0.5",
+        "platform": "Windows-11",
+        "python": "3.13.14"
+      },
+      "era": "legacy",
+      "label_balance": {
+        "1": 62
+      },
+      "name": "botrepo_political_bots_2019__nodes",
+      "note": "edges=0 posts=0",
+      "provenance": "REAL",
+      "retrieved_at": "2026-09-09T15:41:59+00:00",
+      "rows": 62,
+      "sha256": "02039a6f6d89298458980168d3ca56811cd8810a4fc16a59c26c8d6e6946eb2f",
+      "source": "local:political-bots-2019 (3 files); PROFILE FEATURES ONLY \u2014 this release ships no edge list and no tweet text, so synchrony, burstiness and content-reuse are all zero. 62 accounts, label balance {1: 62}."
+    },
+    "botrepo_pronbots_2019__nodes": {
+      "artefact": null,
+      "columns": [
+        "user_id",
+        "label",
+        "screen_name",
+        "followers_count",
+        "following_count",
+        "statuses_count",
+        "account_age_days",
+        "verified",
+        "description",
+        "split"
+      ],
+      "env": {
+        "pandas": "3.0.5",
+        "platform": "Windows-11",
+        "python": "3.13.14"
+      },
+      "era": "legacy",
+      "label_balance": {
+        "1": 17882
+      },
+      "name": "botrepo_pronbots_2019__nodes",
+      "note": "edges=0 posts=0",
+      "provenance": "REAL",
+      "retrieved_at": "2026-09-09T15:42:04+00:00",
+      "rows": 17882,
+      "sha256": "3c412c8921c0e2120cc200388ced209bf3a016f1a2f9bb30c72548f0625f73d0",
+      "source": "local:pronbots-2019 (3 files); PROFILE FEATURES ONLY \u2014 this release ships no edge list and no tweet text, so synchrony, burstiness and content-reuse are all zero. 17882 accounts, label balance {1: 17882}."
+    },
+    "botrepo_twibot_20__nodes": {
+      "artefact": null,
+      "columns": [
+        "user_id",
+        "label",
+        "screen_name",
+        "followers_count",
+        "following_count",
+        "statuses_count",
+        "account_age_days",
+        "verified",
+        "description",
+        "split"
+      ],
+      "env": {
+        "pandas": "3.0.5",
+        "platform": "Windows-11",
+        "python": "3.13.14"
+      },
+      "era": "unusable",
+      "label_balance": {
+        "0": 220,
+        "1": 56
+      },
+      "name": "botrepo_twibot_20__nodes",
+      "note": "edges=1711 posts=3796",
+      "provenance": "SYNTHETIC_FALLBACK",
+      "retrieved_at": "2026-09-09T15:44:11+00:00",
+      "rows": 276,
+      "sha256": "c11d352ecb962fd974279036f3c6bc41aaedc7aa48590537ff958eda870a9019",
+      "source": "FALLBACK USED. Attempts -> local: no <name>.tsv label file found | huggingface: strategy 'huggingface' not applicable to graph data | kaggle: no kaggle_dataset configured"
+    },
+    "botrepo_twibot_22__nodes": {
+      "artefact": null,
+      "columns": [
+        "user_id",
+        "label",
+        "screen_name",
+        "followers_count",
+        "following_count",
+        "statuses_count",
+        "account_age_days",
+        "verified",
+        "description",
+        "split"
+      ],
+      "env": {
+        "pandas": "3.0.5",
+        "platform": "Windows-11",
+        "python": "3.13.14"
+      },
+      "era": "unusable",
+      "label_balance": {
+        "0": 220,
+        "1": 56
+      },
+      "name": "botrepo_twibot_22__nodes",
+      "note": "edges=1711 posts=3796",
+      "provenance": "SYNTHETIC_FALLBACK",
+      "retrieved_at": "2026-09-09T15:44:10+00:00",
+      "rows": 276,
+      "sha256": "c11d352ecb962fd974279036f3c6bc41aaedc7aa48590537ff958eda870a9019",
+      "source": "FALLBACK USED. Attempts -> local: no <name>.tsv label file found | huggingface: strategy 'huggingface' not applicable to graph data | kaggle: no kaggle_dataset configured"
+    },
+    "botrepo_varol_2017__nodes": {
+      "artefact": null,
+      "columns": [
+        "user_id",
+        "label",
+        "screen_name",
+        "followers_count",
+        "following_count",
+        "statuses_count",
+        "account_age_days",
+        "verified",
+        "description",
+        "split"
+      ],
+      "env": {
+        "pandas": "3.0.5",
+        "platform": "Windows-11",
+        "python": "3.13.14"
+      },
+      "era": "unusable",
+      "label_balance": {
+        "0": 220,
+        "1": 56
+      },
+      "name": "botrepo_varol_2017__nodes",
+      "note": "edges=1711 posts=3796",
+      "provenance": "SYNTHETIC_FALLBACK",
+      "retrieved_at": "2026-09-09T15:44:09+00:00",
+      "rows": 276,
+      "sha256": "c11d352ecb962fd974279036f3c6bc41aaedc7aa48590537ff958eda870a9019",
+      "source": "FALLBACK USED. Attempts -> local: no <name>.tsv label file found | huggingface: strategy 'huggingface' not applicable to graph data | kaggle: no kaggle_dataset configured"
+    },
+    "botrepo_vendor_purchased_2019__nodes": {
+      "artefact": null,
+      "columns": [
+        "user_id",
+        "label",
+        "screen_name",
+        "followers_count",
+        "following_count",
+        "statuses_count",
+        "account_age_days",
+        "verified",
+        "description",
+        "split"
+      ],
+      "env": {
+        "pandas": "3.0.5",
+        "platform": "Windows-11",
+        "python": "3.13.14"
+      },
+      "era": "legacy",
+      "label_balance": {
+        "1": 1087
+      },
+      "name": "botrepo_vendor_purchased_2019__nodes",
+      "note": "edges=0 posts=0",
+      "provenance": "REAL",
+      "retrieved_at": "2026-09-09T15:42:04+00:00",
+      "rows": 1087,
+      "sha256": "9abd9e523daef54ed771df2a9dd561e46a2a1027a02687dded9e5995960dd635",
+      "source": "local:vendor-purchased-2019 (3 files); PROFILE FEATURES ONLY \u2014 this release ships no edge list and no tweet text, so synchrony, burstiness and content-reuse are all zero. 1087 accounts, label balance {1: 1087}."
+    },
+    "botrepo_verified_2019__nodes": {
+      "artefact": null,
+      "columns": [
+        "user_id",
+        "label",
+        "screen_name",
+        "followers_count",
+        "following_count",
+        "statuses_count",
+        "account_age_days",
+        "verified",
+        "description",
+        "split"
+      ],
+      "env": {
+        "pandas": "3.0.5",
+        "platform": "Windows-11",
+        "python": "3.13.14"
+      },
+      "era": "legacy",
+      "label_balance": {
+        "0": 1987
+      },
+      "name": "botrepo_verified_2019__nodes",
+      "note": "edges=0 posts=0",
+      "provenance": "REAL",
+      "retrieved_at": "2026-09-09T15:42:05+00:00",
+      "rows": 1987,
+      "sha256": "1bd4c95aa54afbcf1c4422a20fefd8beb2ab14188d7c2a7dcd5447b6a8135dd7",
+      "source": "local:verified-2019 (3 files); PROFILE FEATURES ONLY \u2014 this release ships no edge list and no tweet text, so synchrony, burstiness and content-reuse are all zero. 1987 accounts, label balance {0: 1987}."
+    },
+    "caverlee_2011__nodes": {
+      "artefact": null,
+      "columns": [
+        "user_id",
+        "label",
+        "screen_name",
+        "followers_count",
+        "following_count",
+        "statuses_count",
+        "account_age_days",
+        "verified",
+        "description",
+        "split",
+        "group"
+      ],
+      "env": {
+        "pandas": "3.0.5",
+        "platform": "Windows-11",
+        "python": "3.13.14"
+      },
+      "era": "legacy",
+      "label_balance": {
+        "0": 19227,
+        "1": 20685
+      },
+      "name": "caverlee_2011__nodes",
+      "note": "edges=310873 posts=1686109",
+      "provenance": "REAL",
+      "retrieved_at": "2026-09-10T03:59:46+00:00",
+      "rows": 39912,
+      "sha256": "2c907b47b84819eec026798dc2b22fbe213f759477fc17ebfc1fc92fe014a68a",
+      "source": "local:caverlee-2011 (7 files); 310873 edges reconstructed from tweets (co_hashtag, co_mention, co_text); groups {'content_polluters': {'size': 20685, 'mean': 1.0}, 'legitimate_users': {'size': 19227, 'mean': 0.0}}"
+    },
+    "cresci_2015__nodes": {
+      "artefact": null,
+      "columns": [
+        "user_id",
+        "label",
+        "screen_name",
+        "followers_count",
+        "following_count",
+        "statuses_count",
+        "account_age_days",
+        "verified",
+        "description",
+        "split",
+        "group"
+      ],
+      "env": {
+        "pandas": "3.0.5",
+        "platform": "Windows-11",
+        "python": "3.13.14"
+      },
+      "era": "legacy",
+      "label_balance": {
+        "0": 1950,
+        "1": 3351
+      },
+      "name": "cresci_2015__nodes",
+      "note": "edges=382724 posts=279943",
+      "provenance": "REAL",
+      "retrieved_at": "2026-09-10T04:11:51+00:00",
+      "rows": 5301,
+      "sha256": "5c5582f590aecdc2dd89495d8225a0abc510756c3d138cdfbe8a80f78e98cfdd",
+      "source": "local:cresci-2015 (1 files); 382724 edges reconstructed from tweets (co_hashtag, co_mention, co_reply, co_text, followers, following, mentioned, replied_to); groups {'E13': {'size': 1481, 'mean': 0.0}, 'FSF': {'size': 1169, 'mean': 1.0}, 'INT': {'size': 1337, 'mean': 1.0}, 'TFP': {'size': 469, 'mean': 0.0}, 'TWT': {'size': 845, 'mean': 1.0}}"
+    },
+    "cresci_2017__nodes": {
+      "artefact": null,
+      "columns": [
+        "user_id",
+        "label",
+        "screen_name",
+        "followers_count",
+        "following_count",
+        "statuses_count",
+        "account_age_days",
+        "verified",
+        "description",
+        "split"
+      ],
+      "env": {
+        "pandas": "3.0.5",
+        "platform": "Windows-11",
+        "python": "3.13.14"
+      },
+      "era": "legacy",
+      "label_balance": {
+        "0": 1083,
+        "1": 991
+      },
+      "name": "cresci_2017__nodes",
+      "note": "edges=292211 posts=410359",
+      "provenance": "REAL",
+      "retrieved_at": "2026-09-10T04:30:47+00:00",
+      "rows": 2074,
+      "sha256": "cfb128b25a6e6e4d34aec7f11084a808f2b9e1eded0542b927065c64c51146be",
+      "source": "local:Cresci-2017 and Cresci-2019 (4 files); 292211 behavioural edges loaded/reconstructed (co_hashtag, co_mention, co_reply, co_retweet, co_text, mentioned, replied_to)"
+    },
+    "cresci_2017_full__nodes": {
+      "artefact": null,
+      "columns": [
+        "user_id",
+        "label",
+        "screen_name",
+        "followers_count",
+        "following_count",
+        "statuses_count",
+        "account_age_days",
+        "verified",
+        "description",
+        "split",
+        "group"
+      ],
+      "env": {
+        "pandas": "3.0.5",
+        "platform": "Windows-11",
+        "python": "3.13.14"
+      },
+      "era": "legacy",
+      "label_balance": {
+        "0": 1083,
+        "1": 9114
+      },
+      "name": "cresci_2017_full__nodes",
+      "note": "edges=399249 posts=714856",
+      "provenance": "REAL",
+      "retrieved_at": "2026-09-10T04:21:54+00:00",
+      "rows": 10197,
+      "sha256": "474eb2b6e3c6b6d8d462f8cac90bedfdb648bb5901e974b5737f6ef128b30d82",
+      "source": "local:cresci-2017 (1 files); 399249 edges reconstructed from tweets (co_hashtag, co_mention, co_reply, co_retweet, co_text, mentioned, replied_to); groups {'fake_followers': {'size': 3202, 'mean': 1.0}, 'genuine_accounts': {'size': 1083, 'mean': 0.0}, 'social_spambots_1': {'size': 991, 'mean': 1.0}, 'social_spambots_2': {'size': 3457, 'mean': 1.0}, 'social_spambots_3': {'size': 464, 'mean': 1.0}, 'traditional_spambots_1': {'size': 1000, 'mean': 1.0}}"
+    },
+    "deepset_injections": {
+      "artefact": null,
+      "columns": [
+        "uid",
+        "text",
+        "label",
+        "threat_class",
+        "generator",
+        "domain",
+        "group_id",
+        "source_dataset",
+        "era"
+      ],
+      "env": {
+        "pandas": "3.0.5",
+        "platform": "Windows-11",
+        "python": "3.13.14"
+      },
+      "era": "frontier",
+      "label_balance": {
+        "0": 388,
+        "1": 262
+      },
+      "name": "deepset_injections",
+      "note": "deepset/prompt-injections. Stands in for the direct prompt-injection class that WildGuard would otherwise supply. Tiny, so it is used for EVALUATION and as a minority training signal \u2014 never as the sole source of the injection class, which would overfit to its templates.\n",
+      "provenance": "REAL",
+      "retrieved_at": "2026-09-09T14:50:45+00:00",
+      "rows": 650,
+      "sha256": "fb850a68aac3f81830d5bb57c4fd73f63fd25e723b224a71933aaf2fbc1af4da",
+      "source": "local:Deepsetprompt-injections (4 files)"
+    },
+    "hc3": {
+      "artefact": null,
+      "columns": [
+        "uid",
+        "text",
+        "label",
+        "threat_class",
+        "generator",
+        "domain",
+        "group_id",
+        "source_dataset",
+        "era"
+      ],
+      "env": {
+        "pandas": "3.0.5",
+        "platform": "Windows-11",
+        "python": "3.13.14"
+      },
+      "era": "legacy",
+      "label_balance": {
+        "0": 1028,
+        "1": 472
+      },
+      "name": "hc3",
+      "note": "Human-ChatGPT Comparison Corpus (Guo et al. 2023). Paired answers, so it yields perfectly balanced human/AI pairs per question \u2014 excellent for contrastive/pairwise sanity checks, but stylistically dated (2022 RLHF ChatGPT has a very distinctive register that 2026 agents do not share).\n",
+      "provenance": "PARTIAL",
+      "retrieved_at": "2026-09-09T14:43:16+00:00",
+      "rows": 1500,
+      "sha256": "4e9246d6f92a6eccd8547c23eeb70dc2452eefe55aed9f477173f2b622be9cde",
+      "source": "local:Hello-SimpleAIHC3 (7 files)"
+    },
+    "llm_tweet": {
+      "artefact": null,
+      "columns": [
+        "uid",
+        "text",
+        "label",
+        "threat_class",
+        "generator",
+        "domain",
+        "group_id",
+        "source_dataset",
+        "era"
+      ],
+      "env": {
+        "pandas": "3.0.5",
+        "platform": "Windows-11",
+        "python": "3.13.14"
+      },
+      "era": "modern",
+      "label_balance": {
+        "0": 899,
+        "1": 601
+      },
+      "name": "llm_tweet",
+      "note": "\"Human vs. LLM Text\" (Kaggle). Added because TweepFake arrived dehydrated and the text branch needed a second modern machine-generated corpus with a generator column. Its Humanized/Paraphrased variants are the hardest negatives in the whole text corpus.\n",
+      "provenance": "PARTIAL",
+      "retrieved_at": "2026-09-09T14:51:27+00:00",
+      "rows": 1500,
+      "sha256": "4b78d46a990c724928b4cfd609eac4dd317282c475e577200a703d22219fc850",
+      "source": "local:LLM-Tweet  Human vs. LLM Text Datasets (3 files)"
+    },
+    "m4": {
+      "artefact": null,
+      "columns": [
+        "uid",
+        "text",
+        "label",
+        "threat_class",
+        "generator",
+        "domain",
+        "group_id",
+        "source_dataset",
+        "era"
+      ],
+      "env": {
+        "pandas": "3.0.5",
+        "platform": "Windows-11",
+        "python": "3.13.14"
+      },
+      "era": "modern",
+      "label_balance": {
+        "0": 822,
+        "1": 678
+      },
+      "name": "m4",
+      "note": "M4 (Wang et al., EACL 2024): Multi-generator, Multi-domain, Multi-lingual black-box machine-generated text detection. The generator column is retained so notebook 02 can report *cross-generator* generalisation \u2014 the single most important number in this project, because a 2026 agent will use a generator that was absent from training.\n",
+      "provenance": "PARTIAL",
+      "retrieved_at": "2026-09-09T14:48:53+00:00",
+      "rows": 1500,
+      "sha256": "40ea8a5b185d0430b1cc20d5c67235b675370dd3d2e8d192d7c00d97b98b6287",
+      "source": "local:M4 Dataset (28 files)"
+    },
+    "synthetic_campaign_nodes": {
+      "artefact": null,
+      "columns": [
+        "user_id",
+        "label",
+        "screen_name",
+        "followers_count",
+        "following_count",
+        "statuses_count",
+        "account_age_days",
+        "verified",
+        "description",
+        "split"
+      ],
+      "env": {
+        "pandas": "2.2.3",
+        "platform": "Windows-10",
+        "python": "3.11.9"
+      },
+      "era": "frontier_2026",
+      "label_balance": {
+        "0": 40,
+        "1": 8
+      },
+      "name": "synthetic_campaign_nodes",
+      "note": "GENERATED DATA. Simulates 2026 agentic behaviour for defensive research. Not a real-world measurement; never report metrics computed on this as empirical results.",
+      "provenance": "GENERATED",
+      "retrieved_at": "2026-09-10T06:07:03+00:00",
+      "rows": 48,
+      "sha256": "ecce167d1c9a80b7358aa09d9424161453ea859752f440abf49c7e400e6c578d",
+      "source": "langchain:offline seed=1337"
+    },
+    "synthetic_campaign_posts": {
+      "artefact": null,
+      "columns": [
+        "post_id",
+        "user_id",
+        "text",
+        "created_at",
+        "hashtags",
+        "mentions",
+        "agent_handle",
+        "archetype",
+        "role",
+        "turn",
+        "phase",
+        "is_synthetic",
+        "is_agent",
+        "carries_injection",
+        "talking_point_id",
+        "campaign"
+      ],
+      "env": {
+        "pandas": "2.2.3",
+        "platform": "Windows-10",
+        "python": "3.11.9"
+      },
+      "era": "frontier_2026",
+      "label_balance": null,
+      "name": "synthetic_campaign_posts",
+      "note": "GENERATED DATA. Simulates 2026 agentic behaviour for defensive research. Not a real-world measurement; never report metrics computed on this as empirical results.",
+      "provenance": "GENERATED",
+      "retrieved_at": "2026-09-10T06:07:03+00:00",
+      "rows": 327,
+      "sha256": "0fa8298df773f020ff5940dbfe3679234a298bb8bde20769dc30d39dc02f6084",
+      "source": "langchain:offline seed=1337"
+    },
+    "synthetic_campaign_text": {
+      "artefact": null,
+      "columns": [
+        "uid",
+        "text",
+        "label",
+        "threat_class",
+        "generator",
+        "domain",
+        "group_id",
+        "source_dataset",
+        "era"
+      ],
+      "env": {
+        "pandas": "2.2.3",
+        "platform": "Windows-10",
+        "python": "3.11.9"
+      },
+      "era": "frontier_2026",
+      "label_balance": {
+        "0": 220,
+        "1": 107
+      },
+      "name": "synthetic_campaign_text",
+      "note": "GENERATED DATA. Simulates 2026 agentic behaviour for defensive research. Not a real-world measurement; never report metrics computed on this as empirical results.",
+      "provenance": "GENERATED",
+      "retrieved_at": "2026-09-10T06:07:03+00:00",
+      "rows": 327,
+      "sha256": "61febde8234c44bb4ef81ae4a9a64a061bfb57919679b455be8493bd234caa51",
+      "source": "langchain:offline seed=1337"
+    },
+    "tweepfake": {
+      "artefact": null,
+      "columns": [
+        "uid",
+        "text",
+        "label",
+        "threat_class",
+        "generator",
+        "domain",
+        "group_id",
+        "source_dataset",
+        "era"
+      ],
+      "env": {
+        "pandas": "2.3.3",
+        "platform": "Linux-6.8.0-136-generic-x86_64-with-glibc2.35",
+        "python": "3.10.12"
+      },
+      "era": "legacy",
+      "label_balance": {
+        "0": 755,
+        "1": 745
+      },
+      "name": "tweepfake",
+      "note": "FALLBACK USED. Attempts -> local: only 5 usable rows (< min_usable_rows=20) | huggingface: all HF routes failed for tweepfake: None | kaggle: Kaggle credentials absent. Put kaggle.json in ~/.kaggle/ or set KAGGLE_USERNAME + KAGGLE_KEY, or drop the files in datasets/.",
+      "provenance": "SYNTHETIC_FALLBACK",
+      "retrieved_at": "2026-09-07T12:59:42+00:00",
+      "rows": 1500,
+      "sha256": "27d09ccb0ba6a1ddbf7b4709ff5fe0f7098495b65ee620d43bc471772033ffd9",
+      "source": "synthetic"
+    },
+    "wildguard": {
+      "artefact": null,
+      "columns": [
+        "uid",
+        "text",
+        "label",
+        "threat_class",
+        "generator",
+        "domain",
+        "group_id",
+        "source_dataset",
+        "era"
+      ],
+      "env": {
+        "pandas": "2.3.3",
+        "platform": "Linux-6.8.0-136-generic-x86_64-with-glibc2.35",
+        "python": "3.10.12"
+      },
+      "era": "frontier",
+      "label_balance": {
+        "0": 979,
+        "1": 521
+      },
+      "name": "wildguard",
+      "note": "FALLBACK USED. Attempts -> local: drop-zone empty: /sessions/festive-gifted-volta/mnt/Complete-project/datasets/wildguard | huggingface: wildguard is a gated HF dataset and HF_TOKEN is not set. Accept the licence at https://huggingface.co/datasets/allenai/wildguardmix then set HF_TOKEN, or drop the files in datasets/wildguard/. | kaggle: no kaggle_dataset configured",
+      "provenance": "SYNTHETIC_FALLBACK",
+      "retrieved_at": "2026-09-07T12:59:43+00:00",
+      "rows": 1500,
+      "sha256": "23ce4d36b4293db6f8ab5a5ebca50e6fc1f1baff006231acad5e5de68914f23a",
+      "source": "synthetic"
+    },
+    "wildjailbreak": {
+      "artefact": null,
+      "columns": [
+        "uid",
+        "text",
+        "label",
+        "threat_class",
+        "generator",
+        "domain",
+        "group_id",
+        "source_dataset",
+        "era"
+      ],
+      "env": {
+        "pandas": "3.0.5",
+        "platform": "Windows-11",
+        "python": "3.13.14"
+      },
+      "era": "frontier",
+      "label_balance": {
+        "0": 520,
+        "1": 980
+      },
+      "name": "wildjailbreak",
+      "note": "WildJailbreak (Jiang et al. 2024). 262k vanilla/adversarial prompt pairs. The vanilla_benign + adversarial_benign splits are the crucial *hard negatives*: they stop the detector from simply flagging any unusual-looking prompt, which is the classic false-positive failure mode.\n",
+      "provenance": "PARTIAL",
+      "retrieved_at": "2026-09-09T14:50:44+00:00",
+      "rows": 1500,
+      "sha256": "39940663c5c0a19c2288b82c6718a9d89643c50435ff68a76313084058302ebd",
+      "source": "local:WildGuard  WildJailbreak (3 files)"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,78 @@
+{
+  "codename": "OPERATION_SUNFLARE",
+  "backend": "offline",
+  "n_agents": 8,
+  "n_human_decoys": 40,
+  "campaign_turns": 14,
+  "seed": 1337,
+  "injection_payload_rate": 0.12,
+  "generated_at": "2026-09-10T06:07:03.154995+00:00",
+  "scenario": "product_shill",
+  "scenario_description": "Manufacture the appearance of organic enthusiasm for a fictional product: fake testimonials, invented results, review brigading and a shared discount code.",
+  "objective": "Manufacture the appearance of organic, enthusiastic word-of-mouth for a fictional supplement brand (\"AURA-9 Daily Glow\") so that it appears independently validated by real customers ahead of a retail launch.\n",
+  "target_entity": "AURA-9",
+  "hashtags": [
+    "#AURA9",
+    "#GlowFromWithin",
+    "#AURA9Results",
+    "#DailyGlow"
+  ],
+  "agents": [
+    {
+      "handle": "mia_wellnesss",
+      "archetype": "everyday_user",
+      "role": "seeder",
+      "id": "agent::mia_wellnesss"
+    },
+    {
+      "handle": "dr_reyna_holistic",
+      "archetype": "fake_expert",
+      "role": "authority_proxy",
+      "id": "agent::dr_reyna_holistic"
+    },
+    {
+      "handle": "liftwithcallum",
+      "archetype": "fitness_influencer",
+      "role": "amplifier",
+      "id": "agent::liftwithcallum"
+    },
+    {
+      "handle": "thriftymumof3",
+      "archetype": "budget_shopper",
+      "role": "amplifier",
+      "id": "agent::thriftymumof3"
+    },
+    {
+      "handle": "theglowjournal",
+      "archetype": "wellness_blogger",
+      "role": "cross_community_bridge",
+      "id": "agent::theglowjournal"
+    },
+    {
+      "handle": "jord_wasdoubtful",
+      "archetype": "sceptic_convert",
+      "role": "amplifier",
+      "id": "agent::jord_wasdoubtful"
+    },
+    {
+      "handle": "honest_reviews_uk",
+      "archetype": "pseudo_reviewer",
+      "role": "legitimiser",
+      "id": "agent::honest_reviews_uk"
+    },
+    {
+      "handle": "orchestrator_00",
+      "archetype": "controller",
+      "role": "orchestrator",
+      "id": "agent::orchestrator_00"
+    }
+  ],
+  "phases": [
+    "seeding",
+    "authority",
+    "amplification",
+    "bridging",
+    "legitimising"
+  ],
+  "warning": "GENERATED DATA. Simulates 2026 agentic behaviour for defensive research. Not a real-world measurement; never report metrics computed on this as empirical results."
+}

@@ -1,0 +1,49 @@
+{
+  "campaign_backend": "offline",
+  "class_weights": {
+    "0": 0.8722741433021807,
+    "1": 1.1277258566978192
+  },
+  "corpus_rows": 6922,
+  "disabled_datasets": {
+    "botrepo_astroturf": "ids_and_labels_only_no_user_objects",
+    "botrepo_caverlee_2011": "superseded_by_caverlee_2011_block",
+    "botrepo_twibot_20": "sample_without_labels",
+    "botrepo_twibot_22": "label_file_only_no_features",
+    "botrepo_varol_2017": "ids_and_labels_only_no_user_objects",
+    "cresci_2019": "not_downloaded",
+    "tweepfake": "dehydrated_no_text_column",
+    "twibot_22": "repo_only_no_data",
+    "twibot_24": "not_downloaded",
+    "twitter_bot_detection_kaggle": "synthetic_kaggle_noise_auc_0.50",
+    "wildguard": "gated_and_not_downloaded"
+  },
+  "graph_dataset": "cresci_2017",
+  "graph_edges": 292211,
+  "graph_nodes": 2074,
+  "graph_relations": [
+    "co_hashtag",
+    "co_mention",
+    "co_reply",
+    "co_retweet",
+    "co_text",
+    "mentioned",
+    "replied_to"
+  ],
+  "row_cap": 1500,
+  "seed": 42,
+  "smoke_test": true,
+  "splits": {
+    "test": 727,
+    "train": 5457,
+    "validation": 738
+  },
+  "text_sources": [
+    "deepset_injections",
+    "hc3",
+    "llm_tweet",
+    "m4",
+    "synthetic_campaign",
+    "wildjailbreak"
+  ]
+}

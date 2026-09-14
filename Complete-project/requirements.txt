@@ -1,0 +1,143 @@
+# ============================================================================
+#  AEGIS-SN  ·  Adversarial agEntic Graph & Inference System for Social Networks
+#  "Identification and classification of adversarial agentic AI behaviors in
+#   centralized and decentralized social networks."
+# ----------------------------------------------------------------------------
+#  Python: 3.10 / 3.11 STRONGLY recommended. Use 3.11 if you have a choice.
+#
+#  Verified on this machine: `py -0p` reports 3.14 and 3.13 installed.
+#    * 3.14 will NOT work — torch has no wheels for it at any version.
+#    * 3.13 works only with torch>=2.6, and `sentencepiece` (required by the
+#      DeBERTa-v3 tokenizer) has no 3.13 wheel on Windows, so pip falls back to
+#      a source build that needs Visual C++ Build Tools. If notebook 02 fails on
+#      `AutoTokenizer.from_pretrained`, this is why.
+#    * 3.11 has binary wheels for every pin below, including sentencepiece and
+#      the compiled PyG extras.
+#
+#  Install 3.11 alongside what you have and build the venv against it:
+#      winget install Python.Python.3.11
+#      py -3.11 -m venv .venv
+#      .venv\Scripts\activate
+#
+#  INSTALL ORDER MATTERS — PyTorch Geometric compiles against the exact torch
+#  build, so install torch first, then the PyG extras from the matching wheel
+#  index. See `README.md` and `docs/GENERALIZATION_RUNBOOK.md` for commands.
+#
+#      python -m venv .venv && source .venv/bin/activate     # Win: .venv\Scripts\activate
+#      pip install --upgrade pip wheel setuptools
+#      pip install torch==2.3.1 --index-url https://download.pytorch.org/whl/cpu
+#      pip install -r requirements.txt
+#
+#  GPU users: swap the torch index-url for cu121 and (optionally) install the
+#  compiled PyG extras:
+#      pip install torch-scatter torch-sparse \
+#          -f https://data.pyg.org/whl/torch-2.3.1+cu121.html
+#  They are OPTIONAL — every GNN layer used in notebook 03 falls back to pure
+#  torch scatter ops when the compiled extensions are absent.
+# ============================================================================
+
+# ---------------------------------------------------------------------------
+# Core numerics / data wrangling
+# ---------------------------------------------------------------------------
+numpy>=1.24,<2.1
+pandas>=2.0,<2.3
+pyarrow>=14.0                 # parquet IO for the processed dataset cache
+scipy>=1.10,<1.15
+PyYAML>=6.0                   # ml/configs/*.yaml is the single source of truth
+
+# ---------------------------------------------------------------------------
+# Deep learning — text branch
+# ---------------------------------------------------------------------------
+# Upper bound is deliberately loose: on Python 3.13 nothing below 2.6 has wheels,
+# so a hard `<2.5` pin makes the file uninstallable on a 3.13 interpreter.
+torch>=2.1,<2.9               # install FIRST via the pytorch index (see header)
+transformers>=4.40,<4.46      # DebertaV2ForSequenceClassification
+tokenizers>=0.19,<0.21
+sentencepiece>=0.1.99         # REQUIRED: DeBERTa-v3 uses a SentencePiece tokenizer
+protobuf>=3.20,<5.0           # REQUIRED: converting the SP model -> fast tokenizer
+accelerate>=0.30              # REQUIRED by transformers.Trainer >= 4.40
+safetensors>=0.4.2
+datasets>=2.19,<3.1           # Hugging Face dataset ingestion (notebook 01)
+huggingface-hub>=0.23
+evaluate>=0.4.1
+sacremoses>=0.1.1             # optional detokenisation helper for M4 subsets
+
+# ---------------------------------------------------------------------------
+# Deep learning — graph branch
+# ---------------------------------------------------------------------------
+torch-geometric>=2.5,<2.7     # GraphSAGE / GAT / RGCN layers, PyG Data objects
+networkx>=3.1,<3.4            # interaction-graph construction + classic metrics
+python-louvain>=0.16          # community detection (import name: `community`)
+node2vec>=0.4.6               # optional structural embeddings baseline
+
+# ---------------------------------------------------------------------------
+# Classical ML / fusion layer
+# ---------------------------------------------------------------------------
+scikit-learn>=1.3,<1.6
+lightgbm>=4.1                 # gradient-boosted stacking meta-learner (nb 04)
+xgboost>=2.0                  # alternative meta-learner for the ablation table
+imbalanced-learn>=0.12        # SMOTE / class-balanced resampling
+joblib>=1.3                   # persisting the fusion model + scalers
+shap>=0.44                    # feature attribution for the fusion explanation
+
+# ---------------------------------------------------------------------------
+# Synthetic agentic-campaign generation (notebook 01)
+# ---------------------------------------------------------------------------
+langchain>=0.2.5,<0.4
+langchain-core>=0.2.7,<0.4
+langchain-community>=0.2.5,<0.4   # provides FakeListChatModel for offline mode
+langchain-openai>=0.1.8           # optional live backend  (OPENAI_API_KEY)
+langchain-anthropic>=0.1.15       # optional live backend  (ANTHROPIC_API_KEY)
+tenacity>=8.2                     # retry/backoff around live LLM calls
+faker>=25.0                       # believable handles, bios, join dates
+
+# ---------------------------------------------------------------------------
+# Dataset acquisition
+# ---------------------------------------------------------------------------
+kaggle>=1.6.14                # TweepFake + Cresci mirrors  (needs ~/.kaggle/kaggle.json)
+gdown>=5.1                    # TwiBot-22 / TwiBot-24 Google Drive releases
+requests>=2.31
+tqdm>=4.66
+
+# ---------------------------------------------------------------------------
+# Backend API (Phase 2)
+# ---------------------------------------------------------------------------
+fastapi>=0.111,<0.116
+uvicorn[standard]>=0.30
+pydantic>=2.7,<3.0
+pydantic-settings>=2.3
+python-multipart>=0.0.9       # multipart/form-data (bulk JSONL upload endpoint)
+sqlalchemy>=2.0,<2.1
+alembic>=1.13                 # schema migrations
+psycopg[binary]>=3.1          # PostgreSQL driver (prod)
+                              # SQLite (dev) needs no extra driver
+orjson>=3.10                  # fast JSON responses for large graph payloads
+slowapi>=0.1.9                # per-IP rate limiting on the inference endpoints
+python-jose[cryptography]>=3.3 # JWT for the optional analyst-auth layer
+passlib[bcrypt]>=1.7.4
+httpx>=0.27                   # async client + FastAPI TestClient transport
+
+# ---------------------------------------------------------------------------
+# Visualisation / reporting (notebooks)
+# ---------------------------------------------------------------------------
+matplotlib>=3.7,<3.10
+seaborn>=0.13
+plotly>=5.20                  # interactive force-directed preview in-notebook
+
+# ---------------------------------------------------------------------------
+# Notebook runtime & tooling
+# ---------------------------------------------------------------------------
+jupyterlab>=4.1
+ipywidgets>=8.1
+nbformat>=5.10
+nbconvert>=7.16
+python-dotenv>=1.0
+
+# ---------------------------------------------------------------------------
+# Dev / QA  (optional: `pip install -r requirements-dev.txt` in real repos)
+# ---------------------------------------------------------------------------
+pytest>=8.2
+pytest-asyncio>=0.23
+ruff>=0.4.8
+black>=24.4
+mypy>=1.10

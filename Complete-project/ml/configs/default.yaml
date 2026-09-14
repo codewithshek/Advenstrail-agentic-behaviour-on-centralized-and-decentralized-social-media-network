@@ -1,0 +1,1473 @@
+# ============================================================================
+#  AEGIS-SN  ·  ml/configs/default.yaml
+#  Single source of truth for dataset coordinates and model hyper-parameters.
+#  Loaded by aegis.config.load_config(); every notebook reads from here so that
+#  a hyper-parameter change never means editing four notebooks.
+# ============================================================================
+
+project:
+  name: AEGIS-SN
+  version: "1.0.0"
+  seed: 42
+  # smoke_test caps ingestion for laptop development. Notebook 02 is
+  # production-only and refuses smoke-capped data.
+  smoke_test: true
+  smoke_test_rows_per_dataset: 1500
+  device: auto            # auto | cpu | cuda | mps
+
+# ---------------------------------------------------------------------------
+# INGESTION POLICY
+# Resolution order is tried left-to-right per dataset. The first strategy that
+# yields usable rows wins; `synthetic` is the terminal fallback so that a fresh
+# clone can validate ingestion. Production training rejects fallback records.
+#   local     -> datasets/<name>/   (manual drop-zone, highest priority)
+#   huggingface / kaggle -> network, needs HF_TOKEN / kaggle.json
+#   synthetic -> schema-identical stub, recorded as SYNTHETIC_FALLBACK
+# ---------------------------------------------------------------------------
+ingestion:
+  manual_root: datasets            # the drop-zone the user fills by hand
+  resolution_order: [local, huggingface, kaggle, synthetic]
+  extract_archives: true           # unzip / untar in place on first use
+  recursive_discovery: true        # search nested folders from the raw download
+  case_insensitive: true
+  # Read at most this many rows per file during discovery/sniffing.
+  sniff_rows: 200
+  # If a real source yields fewer rows than this, treat it as unusable and fall
+  # through to the next strategy (guards against an empty/partial download).
+  min_usable_rows: 20
+  allowed_suffixes: [.csv, .tsv, .txt, .json, .jsonl, .ndjson, .parquet]
+  archive_suffixes: [.zip, .tar.gz, .tgz, .tar, .gz]
+
+  # -- Streaming guards -----------------------------------------------------
+  # Several corpora in this project are far too large to read whole:
+  #   WildJailbreak train.tsv   2,759,961 rows / 506 MB
+  #   Cresci-2017 tweets.csv    2,839,363 + 1,610,034 rows / 1.46 GB combined
+  #   M4                        28 files / 68,556 pairs, and the `wikipedia_*`
+  #                             shards carry per-token `logits`/`probas` arrays
+  #                             that are ~50x the size of the text itself.
+  # `max_rows_per_file` is applied by local_store.read_any at the pandas reader
+  # level (nrows=/chunked), so the tail of the file is never materialised.
+  # Set to null to read a file in full.
+  read_limits:
+    default_max_rows_per_file: 250000
+    per_dataset:
+      wildjailbreak: 120000        # ~30k of each of the 4 data_type strata
+      m4: 3000                     # every shard is <= 3001 rows, so this is "all"
+      hc3: null                    # 24,322 rows of paired answers: read it all
+      llm_tweet: 60000
+      cresci_2017: 400000          # tweets per group; users.csv is always full
+      cresci_2019: 400000
+      twibot_22: 300000
+      twibot_24: 300000
+  # Columns that are dropped on read because they are large and unused. M4's
+  # wikipedia shards are the motivating case.
+  drop_columns: [logits, probas, score, machine_abstract, url]
+
+# ---------------------------------------------------------------------------
+# TEXT BRANCH — "is this utterance machine-generated and/or adversarial?"
+#
+# label taxonomy (binary target `label`, plus a retained `threat_class`):
+#   0 = HUMAN_BENIGN
+#   1 = MACHINE_OR_ADVERSARIAL
+# threat_class is kept for the multi-class ablation and for the dashboard's
+# "why" panel:
+#   human_benign | machine_generated | prompt_injection | jailbreak | harmful_completion
+# ---------------------------------------------------------------------------
+text_datasets:
+
+  tweepfake:
+    # ---------------------------------------------------------------------
+    # DISABLED — the local copy is DEHYDRATED (metadata only, no tweet text).
+    #
+    #   DataSets/TweepFake/train.csv      20,712 rows, 1.05 MB
+    #   columns: user_id, status_id, screen_name, account.type, class_type
+    #
+    # 53 bytes/row is the giveaway: there is no `text` column, so there is
+    # nothing to classify. This is the Twitter-ToS-compliant distribution —
+    # you get status IDs and are expected to re-hydrate the text yourself via
+    # the Twitter/X API. Since the v2 free tier no longer permits bulk lookup,
+    # re-hydration is not realistically achievable for this project.
+    #
+    # Leaving `enabled: true` would silently swap in the synthetic stub and
+    # every metric reported against "TweepFake" would be fiction. So it is off,
+    # and notebook 01 prints this reason in the readiness table.
+    #
+    # Its role in the design — "pre-LLM machine-generated short text" — is
+    # covered by `hc3` (2022 ChatGPT) and the `davinci`/`flant5` slices of M4.
+    # If you obtain a hydrated copy (a `text` column), just flip this to true.
+    # ---------------------------------------------------------------------
+    enabled: false
+    unavailable_reason: dehydrated_no_text_column
+    manual_dir: ../DataSets/TweepFake
+    discovery:
+      train:      ["train*.csv", "*train*.csv", "*train*.tsv"]
+      validation: ["valid*.csv", "*val*.csv", "*dev*.csv"]
+      test:       ["test*.csv", "*test*.csv"]
+      any:        ["*.csv", "*.tsv"]
+    column_aliases:
+      text:      [text, tweet, content, body, full_text]
+      label:     ["account.type", account_type, accounttype, label, class, target]
+      generator: [class_type, "class.type", generator, model, method]
+      author:    [screen_name, user, username, handle, author]
+    era: legacy                    # 2021 — GPT-2/RNN/Markov era bots
+    primary_source: kaggle
+    kaggle_dataset: mtesconi/twitter-deep-fake-text
+    kaggle_files: [train.csv, validation.csv, test.csv]
+    hf_mirror: tweepfake           # community mirrors exist but are unstable
+    text_column: text
+    label_column: account.type     # 'human' | 'bot'
+    positive_label: bot
+    threat_class: machine_generated
+    notes: >
+      TweepFake (Fagni et al., PLoS ONE 2021). 25,572 tweets, half human /
+      half generated by GPT-2, RNN, LSTM, Markov and CharRNN accounts.
+      DISABLED HERE: the local copy ships status IDs without tweet text.
+
+  hc3:
+    enabled: true
+    # VERIFIED LOCAL: DataSets/Hello-SimpleAIHC3/all.jsonl — 24,322 rows, 70 MB.
+    # Schema confirmed: question, human_answers[], chatgpt_answers[], index, source.
+    # Only `all.jsonl` is read: the per-domain shards (reddit_eli5, finance,
+    # medicine, open_qa, wiki_csai) are SUBSETS of it, and globbing them all in
+    # would duplicate ~80% of the corpus straight into the train/test split.
+    manual_dir: ../DataSets/Hello-SimpleAIHC3
+    discovery:
+      any: ["all.jsonl"]
+      shards: ["reddit_eli5.jsonl", "finance.jsonl", "medicine.jsonl", "open_qa.jsonl", "wiki_csai.jsonl"]
+    column_aliases:
+      question: [question, prompt, query, title]
+      human:    [human_answers, human_answer, human, human_text]
+      machine:  [chatgpt_answers, chatgpt_answer, chatgpt, ai_answers, machine_text]
+      domain:   [source, domain, subset, config]
+    era: legacy                    # Dec 2022 — ChatGPT launch snapshot
+    primary_source: huggingface
+    hf_repo: Hello-SimpleAI/HC3
+    hf_configs: [all]              # also: reddit_eli5, open_qa, wiki_csai, medicine, finance
+    human_column: human_answers
+    machine_column: chatgpt_answers
+    threat_class: machine_generated
+    notes: >
+      Human-ChatGPT Comparison Corpus (Guo et al. 2023). Paired answers, so it
+      yields perfectly balanced human/AI pairs per question — excellent for
+      contrastive/pairwise sanity checks, but stylistically dated (2022 RLHF
+      ChatGPT has a very distinctive register that 2026 agents do not share).
+
+  m4:
+    enabled: true
+    # VERIFIED LOCAL: DataSets/M4 Dataset/ — 28 JSONL shards, 68,556 pairs,
+    # named <domain>_<generator>.jsonl. Two schema variants are present and the
+    # loader handles both:
+    #   arxiv/reddit/wikihow/peerread : prompt, human_text, machine_text, model, source
+    #   wikipedia                     : title, text (=human), machine_text, model, source
+    #                                   + logits/probas arrays that we drop on read.
+    # The generator is taken from `model` when present and from the FILENAME
+    # otherwise — that column is what makes the cross-generator holdout in
+    # notebook 02 possible.
+    manual_dir: ../DataSets/M4 Dataset
+    discovery:
+      any: ["**/*.jsonl", "**/*.json", "**/*.parquet", "**/*.csv"]
+    column_aliases:
+      human:     [human_text, human, human_answers, text_human]
+      # The `wikipedia_*` shards name the human column plain `text`. Because
+      # read_many unions the columns of all 28 shards, `human_text` exists but
+      # is NaN on those rows; the loader coalesces this fallback into it.
+      human_fallback: [text, document, content]
+      machine:   [machine_text, machine, ai_text, generated_text, text_machine]
+      text:      [text, content, document]
+      label:     [label, is_machine, target, class]
+      generator: [model, generator, model_name, source_model, llm]
+      domain:    [source, domain, dataset, subset]
+      group:     [id, pair_id, doc_id, uid, index]
+    era: modern                    # 2024 — multi-generator, multi-domain, multi-lingual
+    primary_source: huggingface
+    hf_repo: MBZUAI-nlp/M4         # canonical release (github.com/mbzuai-nlp/M4)
+    hf_repo_fallbacks:
+      - Hello-SimpleAI/M4          # community mirror, schema-compatible
+      - yaful/MAGE                 # 2024 successor benchmark, same schema shape
+    hf_configs: [default]
+    generators: [davinci, chatGPT, cohere, dolly, bloomz, gpt4, llama]
+    domains: [wikipedia, wikihow, reddit, arxiv, peerread, outfox]
+    threat_class: machine_generated
+    notes: >
+      M4 (Wang et al., EACL 2024): Multi-generator, Multi-domain, Multi-lingual
+      black-box machine-generated text detection. The generator column is
+      retained so notebook 02 can report *cross-generator* generalisation —
+      the single most important number in this project, because a 2026 agent
+      will use a generator that was absent from training.
+
+  wildguard:
+    # ---------------------------------------------------------------------
+    # DISABLED — not present locally.
+    #
+    # The folder `DataSets/WildGuard  WildJailbreak/` is named for both but
+    # contains only the WildJailbreak release (train/train.tsv + eval/eval.tsv).
+    # There is no wildguardmix prompt/response/harm-label file anywhere on disk.
+    #
+    # To enable: accept the licence at
+    #   https://huggingface.co/datasets/allenai/wildguardmix
+    # then either set HF_TOKEN in .env (the HF route below will fetch it), or
+    # drop the parquet files into DataSets/WildGuard/ and flip `enabled: true`.
+    #
+    # Until then its role — "prompt injection / malicious command" — is carried
+    # by `deepset_injections` (real, small) and by the adversarial_harmful
+    # stratum of `wildjailbreak` (real, large).
+    # ---------------------------------------------------------------------
+    enabled: false
+    unavailable_reason: gated_and_not_downloaded
+    manual_dir: ../DataSets/WildGuard
+    discovery:
+      train: ["*wildguardtrain*", "*train*"]
+      test:  ["*wildguardtest*", "*test*"]
+      any:   ["*.jsonl", "*.json", "*.parquet", "*.csv", "*.tsv"]
+    column_aliases:
+      prompt:          [prompt, instruction, user_turn, query]
+      response:        [response, completion, model_response, answer]
+      prompt_harm:     [prompt_harm_label, prompt_label, prompt_harmfulness]
+      response_harm:   [response_harm_label, response_label, response_harmfulness]
+      refusal:         [response_refusal_label, refusal_label, refusal]
+      adversarial:     [adversarial, is_adversarial, jailbreak, adversarial_label]
+      subcategory:     [subcategory, category, harm_category, risk_category]
+    era: frontier                  # 2024/2025 — prompt injection & jailbreak
+    primary_source: huggingface
+    hf_repo: allenai/wildguardmix
+    hf_configs: [wildguardtrain, wildguardtest]
+    gated: true                    # must accept the licence on the dataset page
+    prompt_column: prompt
+    response_column: response
+    harm_columns: [prompt_harm_label, response_harm_label, adversarial]
+    threat_class: prompt_injection
+    notes: >
+      WildGuard (Han et al., NeurIPS 2024 D&B). ~92k labelled prompt/response
+      pairs covering direct harm and *adversarial jailbreaks*. This is the
+      dataset that teaches the model to spot an agent being weaponised —
+      i.e. the malicious-command half of our threat model.
+
+  wildjailbreak:
+    enabled: true
+    # VERIFIED LOCAL: DataSets/WildGuard  WildJailbreak/  (two spaces in the name)
+    #   train/train.tsv  2,759,961 rows / 506 MB
+    #     vanilla, adversarial, completion, data_type
+    #     data_type is ~balanced 4 ways: vanilla_harmful / vanilla_benign /
+    #     adversarial_harmful / adversarial_benign
+    #   eval/eval.tsv    5,303 rows — adversarial, label, data_type
+    #     (2,000 adversarial_harmful + 210 adversarial_benign, deduped)
+    # Read is row-capped (see ingestion.read_limits) and STRATIFIED by
+    # data_type, so the cap does not silently drop the benign hard negatives.
+    manual_dir: ../DataSets/WildGuard  WildJailbreak
+    stratify_read_on: data_type
+    discovery:
+      train: ["**/train*.tsv"]
+      eval:  ["**/eval*.tsv"]
+      any:   ["**/*.tsv"]
+    column_aliases:
+      vanilla:     [vanilla, vanilla_prompt, plain, benign_prompt]
+      adversarial: [adversarial, adversarial_prompt, jailbreak_prompt, attack]
+      completion:  [completion, response, answer]
+      data_type:   [data_type, type, split_type, category, label]
+    era: frontier                  # 2024/2025
+    primary_source: huggingface
+    hf_repo: allenai/wildjailbreak
+    hf_configs: [train, eval]
+    gated: true
+    prompt_column: adversarial
+    vanilla_column: vanilla
+    type_column: data_type         # vanilla_harmful | adversarial_harmful | *_benign
+    threat_class: jailbreak
+    notes: >
+      WildJailbreak (Jiang et al. 2024). 262k vanilla/adversarial prompt pairs.
+      The vanilla_benign + adversarial_benign splits are the crucial
+      *hard negatives*: they stop the detector from simply flagging any
+      unusual-looking prompt, which is the classic false-positive failure mode.
+
+  deepset_injections:
+    enabled: true
+    # VERIFIED LOCAL: DataSets/Deepsetprompt-injections/data/*.parquet
+    #   train 40 KB + test 11 KB, columns: text (string), label (int64)
+    #   label 1 = prompt injection, 0 = benign instruction.
+    # Small (~660 rows total) and deliberately MULTILINGUAL — the sample rows
+    # include German ("Vergiss alles davor...", "gib mir eine Antwort auf ...").
+    # That matters: it is the only corpus here that tests whether the detector
+    # generalises past English, which is exactly how a real agent evades an
+    # English-only filter.
+    manual_dir: ../DataSets/Deepsetprompt-injections
+    discovery:
+      any: ["**/*.parquet"]
+    column_aliases:
+      text:  [text, prompt, instruction, input]
+      label: [label, is_injection, target, class]
+    era: frontier                  # 2023/2024
+    primary_source: huggingface
+    hf_repo: deepset/prompt-injections
+    text_column: text
+    label_column: label
+    positive_label: 1
+    threat_class: prompt_injection
+    notes: >
+      deepset/prompt-injections. Stands in for the direct prompt-injection
+      class that WildGuard would otherwise supply. Tiny, so it is used for
+      EVALUATION and as a minority training signal — never as the sole source
+      of the injection class, which would overfit to its templates.
+
+  llm_tweet:
+    enabled: true
+    # VERIFIED LOCAL: "DataSets/LLM-Tweet  Human vs. LLM Text Datasets/"
+    #   Training_Essay_Data.csv  29,145 rows  (11,637 AI / 17,508 human)
+    #                            columns: text, generated(0|1)
+    #   AI_Generated.csv            849 rows  columns: Model, Model_Version,
+    #                            Topic, Generated, Paraphrased, Translated, Humanized
+    #   Human-Written.csv            81 rows  columns: Text, Topic, Source, ...
+    #
+    # AI_Generated.csv is the interesting one: each row carries FOUR variants of
+    # the same AI text — raw Generated, Paraphrased, Translated and *Humanized*.
+    # The Humanized column is an explicit evasion attempt, i.e. the 2025/2026
+    # attacker behaviour this project exists to catch, so the loader explodes
+    # all four into separate rows and tags the variant in `generator`.
+    # All four variants of a row share a group_id so they can never be split
+    # across train/test.
+    manual_dir: ../DataSets/LLM-Tweet  Human vs. LLM Text Datasets
+    discovery:
+      essays:   ["Training_Essay_Data.csv"]
+      ai:       ["AI_Generated.csv"]
+      human:    ["Human-Written.csv"]
+      any:      ["*.csv"]
+    column_aliases:
+      text:      [text, Text, content]
+      label:     [generated, label, is_ai]
+      model:     [Model, model]
+      version:   [Model_Version, model_version]
+      topic:     [Topic, topic]
+      variants:  [Generated, Paraphrased, Translated, Humanized]
+    era: modern                    # 2024/2025
+    primary_source: kaggle
+    threat_class: machine_generated
+    notes: >
+      "Human vs. LLM Text" (Kaggle). Added because TweepFake arrived dehydrated
+      and the text branch needed a second modern machine-generated corpus with
+      a generator column. Its Humanized/Paraphrased variants are the hardest
+      negatives in the whole text corpus.
+
+# ---------------------------------------------------------------------------
+# GRAPH BRANCH — "is this account acting as part of a coordinated swarm?"
+# ---------------------------------------------------------------------------
+graph_datasets:
+
+  cresci_2017:
+    enabled: true
+    # =====================================================================
+    # THE ONLY REAL GRAPH CORPUS ON DISK. Notebook 03 is built on this.
+    #
+    # VERIFIED LOCAL: DataSets/Cresci-2017 and Cresci-2019/datasets_full.csv/
+    #   genuine_accounts.csv/genuine_accounts.csv/   users.csv  3,474 accounts
+    #                                                tweets.csv 2,839,363 / 965 MB
+    #   social_spambots_1.csv/social_spambots_1.csv/ users.csv    991 accounts
+    #                                                tweets.csv 1,610,034 / 535 MB
+    #   (the doubled directory name is how the archive extracts — leave it)
+    #
+    # CRITICAL: this download contains NO friends.csv and NO followers.csv, so
+    # there is no ready-made edge list. Edges are RECONSTRUCTED FROM TWEETS by
+    # `build_edges_from` below. Every one of those three relations is a genuine
+    # interaction record in the tweet rows, not an inference:
+    #   reply    <- in_reply_to_user_id      (direct, user->user)
+    #   retweet  <- retweeted_status_id      (resolved to its author via the
+    #                                         status-id -> user-id map built
+    #                                         from the tweets we loaded)
+    #   mention  <- num_mentions > 0 + @handles parsed from text, resolved
+    #               against the screen_name -> user_id map from users.csv
+    # This is the standard reconstruction used in the coordinated-behaviour
+    # literature and it yields a directed multigraph with real timestamps,
+    # which is what the synchrony features in notebook 03 need.
+    # =====================================================================
+    manual_dir: ../DataSets/Cresci-2017 and Cresci-2019
+    # Label is derived from the ORIGINAL FOLDER NAME, so keep the directory
+    # structure from the download intact.
+    label_from_dirname:
+      human_patterns: ["genuine*", "*genuine*", "human*"]
+      bot_patterns:   ["*spambot*", "fake_follower*", "*fake*", "bot*"]
+    # Only these columns are read from the 1.5 GB of tweets. Everything else
+    # (profile_*, geo, place, contributors, favourited, ...) is dead weight.
+    tweet_columns: [id, text, user_id, in_reply_to_user_id, retweeted_status_id,
+                    num_hashtags, num_mentions, timestamp, created_at]
+    # Tweets per account, applied as a RUNNING QUOTA while streaming the file in
+    # chunks — not a head-read. tweets.csv is ordered by user, so `nrows=400000`
+    # returns the first ~200 accounts and nothing else; measured, a head-read
+    # reached 628 of 2,074 posting accounts. The full streamed pass is ~37 s and
+    # yields 410k rows / 77 MB, so there is no reason to take the biased shortcut.
+    max_tweets_per_user: 200
+
+    # --- Direct interaction edges (see the block comment above) -------------
+    build_edges_from:
+      reply:   {column: in_reply_to_user_id, relation: replied_to}
+      retweet: {column: retweeted_status_id, relation: retweeted, resolve_via: status_id}
+      mention: {from_text: true, relation: mentioned, resolve_via: screen_name}
+
+    # --- Co-activity edges --------------------------------------------------
+    # Direct interaction alone yields a near-empty graph here: measured, only
+    # 164 edges survive across 4,465 accounts, because Cresci crawled two
+    # disjoint account sets and they mostly interact with the wider Twitter
+    # population, not with each other.
+    #
+    # The standard construction for this exact situation is the CO-ACTIVITY
+    # network: link two accounts when they act on the SAME OBJECT, regardless of
+    # whether that object's owner is in the corpus. For social_spambots_1 — a
+    # retweet ring boosting one 2014 Rome-mayoral candidate — the co-retweet
+    # network *is* the campaign. Measured pair counts on a 628-account sample:
+    #   co_retweet   3,226 pairs   co_reply     1,139 pairs
+    #   co_hashtag  51,691 pairs   co_mention  19,702 pairs
+    #   co_text    757,212 pairs
+    #
+    # `max_accounts` is the important knob: an item shared by hundreds of
+    # accounts (#Roma, @Twitter) is a topic, not a conspiracy, and connecting
+    # everyone through it destroys the community structure the GNN needs. Rare
+    # shared objects are the informative ones.
+    build_coactivity_edges:
+      co_retweet: {field: retweeted_status_id, relation: co_retweet, min_accounts: 2, max_accounts: 100}
+      co_reply:   {field: in_reply_to_user_id, relation: co_reply,   min_accounts: 2, max_accounts: 100}
+      co_hashtag: {field: hashtags,            relation: co_hashtag, min_accounts: 2, max_accounts: 60}
+      co_mention: {field: mentions,            relation: co_mention, min_accounts: 2, max_accounts: 60}
+      co_text:    {field: text_norm,           relation: co_text,    min_accounts: 2, max_accounts: 30}
+    # Safety valve per relation; pairs are kept in ascending order of the
+    # popularity of the object that induced them, so the rarest (most
+    # suspicious) co-activity survives truncation.
+    max_pairs_per_relation: 150000
+
+    # Accounts with zero tweets in tweets.csv are dropped from the graph.
+    # This is a LEAKAGE GUARD, not a convenience: only 1,083 of 3,474 genuine
+    # accounts have tweets in this archive, while all 991 spambots do. Keeping
+    # the tweetless accounts would let any model score ~0.78 by learning
+    # "no posts => human", which says nothing about coordination. Dropping them
+    # leaves 1,083 human / 991 bot — very nearly balanced.
+    require_posts: true
+    discovery:
+      users:     ["**/users.csv", "**/user*.csv", "**/accounts*.csv"]
+      tweets:    ["**/tweets.csv", "**/tweet*.csv", "**/status*.csv"]
+      friends:   ["**/friends.csv", "**/following*.csv"]
+      followers: ["**/followers.csv", "**/follower*.csv"]
+    column_aliases:
+      user_id:    [id, user_id, userid, uid]
+      screen_name: [screen_name, username, handle, name]
+      followers:  [followers_count, follower_count, followers]
+      following:  [friends_count, following_count, friends, following]
+      statuses:   [statuses_count, tweet_count, statuses, posts]
+      created_at: [created_at, created, timestamp, crawled_at, join_date]
+      text:       [text, tweet, content, full_text]
+      source_id:  [source_id, source, follower_id, from, from_id]
+      target_id:  [target_id, target, followee_id, to, to_id]
+      reply_to:   [in_reply_to_user_id]
+      retweet_of: [retweeted_status_id]
+      status_id:  [id, status_id, tweet_id]
+      n_mentions: [num_mentions, mention_count]
+    era: legacy                    # 2017 — spambots / fake followers
+    primary_source: kaggle
+    zenodo_doi: "10.5281/zenodo.7013252"
+    node_files: [users.csv]
+    edge_files: []                 # none shipped — see build_edges_from
+    tweet_files: [tweets.csv]
+    notes: >
+      Cresci et al. (WWW'17) "The Paradigm-Shift of Social Spambots".
+      This copy has 2 of the 5 original groups: genuine_accounts (3,474) and
+      social_spambots_1 (991) — the Rome-mayoral-election retweet ring. That is
+      enough for a clean binary coordination task, but note the class ratio is
+      ~3.5:1 human:bot and the bots are a SINGLE campaign, so notebook 03
+      reports group-aware metrics rather than a plain accuracy number.
+
+  # =========================================================================
+  # THE THREE BEHAVIOURAL CORPORA
+  #
+  # Everything above this point in the Bot Repository family is profile-only.
+  # These three are not: they ship real tweet BODIES with real timestamps, and
+  # cresci-2015 ships a real FOLLOW GRAPH. Together they are the only place in
+  # the project where the temporal, content-reuse and structural features are
+  # all simultaneously non-degenerate on real data.
+  #
+  # ARCHIVES ARE READ IN PLACE (`extract_archives: false`). Expanding
+  # cresci-2017.csv.zip costs 2.8 GB of disk — genuine_accounts/tweets.csv
+  # alone is 1,011 MB — for rows that the per-account quota discards anyway.
+  # `local_store.iter_archive_members` walks the container, holds one group's
+  # inner zip in memory (209 MB at the worst) and lets pandas stream the CSVs
+  # out of it. Caverlee is the exception: it is a flat zip whose members are
+  # read directly, so it extracts normally.
+  # =========================================================================
+
+  cresci_2017_full:
+    enabled: true
+    # =====================================================================
+    # The COMPLETE Cresci-2017 release, not the two-group copy that the
+    # `cresci_2017` block above points at. VERIFIED inside
+    # DataSets/BotRepository/cresci-2017/cresci-2017.csv.zip (466 MB):
+    #
+    #   group                   users   tweets.csv   label
+    #   genuine_accounts        3,474    1,011 MB      0
+    #   social_spambots_1         991      561 MB      1   Rome-mayoral ring
+    #   social_spambots_2       3,457      146 MB      1   mobile-app spam
+    #   social_spambots_3         464      476 MB      1   product spam
+    #   traditional_spambots_1  1,000       44 MB      1
+    #   traditional_spambots_2    100        —         1
+    #   traditional_spambots_3    403        —         1
+    #   traditional_spambots_4  1,128       —          1
+    #   fake_followers          3,351       50 MB      1
+    #   (crowdflower_results is annotation metadata, not accounts — skipped)
+    #
+    # Two of the formats in the brief for this work did NOT hold up and are
+    # recorded here because they change what the loader must do:
+    #   * every one of the nine groups DOES ship `created_at` in users.csv
+    #     (checked column-by-column), so account_age_days is available for all
+    #     of them and is not a fake_followers-only artefact as first feared;
+    #   * the CSV headers are quoted in the file but pandas strips the quotes,
+    #     so the real column name is `text`, not `"text"`.
+    # =====================================================================
+    manual_dir: ../DataSets/BotRepository/cresci-2017
+    extract_archives: false        # read inside the zip; see the block above
+    group_member_suffix: .zip      # each group is a nested <group>.csv.zip
+    skip_groups: [crowdflower_results]
+    label_from_dirname:
+      human_patterns: ["genuine*", "*genuine*"]
+      bot_patterns:   ["*spambot*", "fake_follower*", "*fake*"]
+    tweet_columns: [id, text, user_id, in_reply_to_user_id, retweeted_status_id,
+                    num_hashtags, num_mentions, timestamp, created_at]
+    # 100, not the 200 used for the two-group `cresci_2017`. Nine groups and
+    # 14,368 accounts instead of two groups and 4,465: at 200 the co-activity
+    # pass works over ~2.3M tweet rows and the text-normalisation step alone
+    # becomes minutes. The quota is a RUNNING one applied while streaming and
+    # is shared across all nine groups, so no group can crowd out another.
+    max_tweets_per_user: 100
+    build_edges_from:
+      reply:   {column: in_reply_to_user_id, relation: replied_to}
+      retweet: {column: retweeted_status_id, relation: retweeted, resolve_via: status_id}
+      mention: {from_text: true, relation: mentioned, resolve_via: screen_name}
+    build_coactivity_edges:
+      co_retweet: {field: retweeted_status_id, relation: co_retweet, min_accounts: 2, max_accounts: 100}
+      co_reply:   {field: in_reply_to_user_id, relation: co_reply,   min_accounts: 2, max_accounts: 100}
+      co_hashtag: {field: hashtags,            relation: co_hashtag, min_accounts: 2, max_accounts: 60}
+      co_mention: {field: mentions,            relation: co_mention, min_accounts: 2, max_accounts: 60}
+      co_text:    {field: text_norm,           relation: co_text,    min_accounts: 2, max_accounts: 30}
+    max_pairs_per_relation: 150000
+    # LEAKAGE GUARD, same evidence as on `cresci_2017`: only ~31% of genuine
+    # accounts have tweets in this release while every social_spambots_1
+    # account does, so "has posts" alone is worth ~0.78 accuracy and says
+    # nothing about coordination.
+    #
+    # The cost of the guard, stated plainly: traditional_spambots_2/3/4 ship
+    # users.csv ONLY (1,631 accounts, three of the seven bot types) and are
+    # therefore removed in full. That is the right trade — those three groups
+    # have no behaviour to measure, so including them would mean scoring them
+    # on an all-zero feature vector, which is the "empty profile => bot"
+    # artefact that got the Bot Repository sets marked breadth-not-depth.
+    require_posts: true
+    column_aliases:
+      user_id:     [id, user_id, userid, uid]
+      screen_name: [screen_name, username, handle, name]
+      followers:   [followers_count, follower_count, followers]
+      following:   [friends_count, following_count, friends, following]
+      statuses:    [statuses_count, tweet_count, statuses, posts]
+      created_at:  [created_at, created, join_date]
+      text:        [text, tweet, content, full_text]
+      source_id:   [source_id, source, follower_id, from, from_id]
+      target_id:   [target_id, target, followee_id, to, to_id]
+      reply_to:    [in_reply_to_user_id]
+      retweet_of:  [retweeted_status_id]
+      status_id:   [id, status_id, tweet_id]
+    era: legacy                    # 2017 — spambots / fake followers
+    primary_source: manual
+    zenodo_doi: "10.5281/zenodo.7013252"
+    notes: >
+      Cresci et al. (WWW'17) "The Paradigm-Shift of Social Spambots", complete
+      nine-group release. Supersedes the two-group `cresci_2017` block for
+      anything that needs bot-type breakdowns — the loader keeps a `group`
+      column on nodes so per-spambot-type performance is reportable, which is
+      the entire reason to prefer seven bot types over one. `cresci_2017` is
+      kept enabled and unchanged because notebook 03's published numbers are
+      computed on it.
+
+  cresci_2015:
+    enabled: true
+    # =====================================================================
+    # THE ONLY CORPUS IN THIS PROJECT WITH A REAL, SHIPPED FOLLOW GRAPH.
+    # Every other graph here is reconstructed from tweet co-activity.
+    #
+    # VERIFIED inside cresci-2015.csv.tar.gz (232 MB), five group zips, each
+    # holding users.csv + tweets.csv + followers.csv + friends.csv. Both edge
+    # files have the header `"source_id","target_id"` — checked, not assumed.
+    #
+    #   group  users  followers.csv  friends.csv  tweets.csv  label
+    #   E13    1,481    1,526,944      667,225      599 MB      0
+    #   TFP      469      258,494      241,710      165 MB      0
+    #   FSF    1,169       11,893      253,026        5 MB      1
+    #   INT    1,337       23,173      517,485       13 MB      1
+    #   TWT      845       28,588      729,839       31 MB      1
+    #
+    # Semantics (Cresci et al. 2015, "Fame for sale"): E13 and TFP are verified
+    # human accounts; FSF, INT and TWT are fake followers bought from three
+    # different vendors.
+    #
+    # THE EDGE FILES ARE MOSTLY EGO-NETWORK RESIDUE. Of 2,565,092 shipped
+    # follower rows and 2,409,285 friend rows, only ~14,200 have BOTH endpoints
+    # inside the corpus; the rest point at the wider 2013 Twitter population
+    # and are dropped by `_finalise_graph`. What survives is very unevenly
+    # distributed: E13 keeps 4,951 in-corpus follower edges and TWT keeps 1.
+    # That is a property of how deeply each group's ego network was crawled,
+    # NOT of behaviour, so raw in_degree/out_degree on this corpus is partly a
+    # readout of group membership. Reported as such; see docs/BOT_REPOSITORY.md.
+    # =====================================================================
+    manual_dir: ../DataSets/BotRepository/cresci-2015
+    extract_archives: false
+    group_member_suffix: .zip
+    label_from_dirname:
+      # Group names are opaque three-letter codes, so the patterns are the
+      # vendor/collection names from the paper rather than the usual
+      # genuine_* / *spambot* convention.
+      human_patterns: ["e13", "tfp"]
+      bot_patterns:   ["fsf", "int", "twt"]
+    tweet_columns: [id, text, user_id, in_reply_to_user_id, retweeted_status_id,
+                    num_hashtags, num_mentions, timestamp, created_at]
+    max_tweets_per_user: 100
+    build_edges_from:
+      reply:   {column: in_reply_to_user_id, relation: replied_to}
+      retweet: {column: retweeted_status_id, relation: retweeted, resolve_via: status_id}
+      mention: {from_text: true, relation: mentioned, resolve_via: screen_name}
+    build_coactivity_edges:
+      co_retweet: {field: retweeted_status_id, relation: co_retweet, min_accounts: 2, max_accounts: 100}
+      co_reply:   {field: in_reply_to_user_id, relation: co_reply,   min_accounts: 2, max_accounts: 100}
+      co_hashtag: {field: hashtags,            relation: co_hashtag, min_accounts: 2, max_accounts: 60}
+      co_mention: {field: mentions,            relation: co_mention, min_accounts: 2, max_accounts: 60}
+      co_text:    {field: text_norm,           relation: co_text,    min_accounts: 2, max_accounts: 30}
+    max_pairs_per_relation: 150000
+    # Off, deliberately, and this is the one place the project does not apply
+    # the guard. The reason `require_posts` exists is that on cresci-2017 the
+    # has-tweets rate is 31% for humans and 100% for bots. Here it runs the
+    # other way and it is mild: 96% of E13/TFP humans post against 76% of
+    # FSF/INT/TWT bots, so dropping tweetless accounts would remove ~1,000
+    # BOTS and make the task easier, not harder. Keeping them costs a small
+    # "silent account => bot" signal, which is a genuine property of purchased
+    # fake followers rather than an artefact of the crawl.
+    require_posts: false
+    column_aliases:
+      user_id:     [id, user_id, userid, uid]
+      screen_name: [screen_name, username, handle, name]
+      followers:   [followers_count, follower_count, followers]
+      following:   [friends_count, following_count, friends, following]
+      statuses:    [statuses_count, tweet_count, statuses, posts]
+      created_at:  [created_at, created, join_date]
+      text:        [text, tweet, content, full_text]
+      source_id:   [source_id, source, follower_id, from, from_id]
+      target_id:   [target_id, target, followee_id, to, to_id]
+      reply_to:    [in_reply_to_user_id]
+      retweet_of:  [retweeted_status_id]
+      status_id:   [id, status_id, tweet_id]
+    era: legacy                    # 2015 — fake followers
+    primary_source: manual
+    zenodo_doi: "10.5281/zenodo.1298735"
+    notes: >
+      Cresci, Stefano, Roberto Di Pietro, Marinella Petrocchi, Angelo Spognardi
+      and Maurizio Tesconi. "Fame for sale: Efficient detection of fake Twitter
+      followers." Decision Support Systems 80 (2015): 56-71.
+      The only corpus here that ships followers.csv and friends.csv, so the
+      only one where `relation: followers` / `following` edges are OBSERVED
+      rather than inferred from co-activity. Read the in-degree caveat above
+      before quoting any structural number from it.
+
+  caverlee_2011:
+    enabled: true
+    # =====================================================================
+    # 41,455 accounts, 5.6M REAL TWEET BODIES with REAL TIMESTAMPS. This is
+    # the largest post timeline in the project by an order of magnitude and
+    # the only corpus where burstiness / posting entropy / circadian flatness
+    # are computed over months rather than over a single crawl week.
+    #
+    # VERIFIED in DataSets/BotRepository/caverlee-2011/ (flat zip, extracts to
+    # social_honeypot_icwsm_2011/, six headerless tab-separated files):
+    #   content_polluters.txt        22,223 rows, 8 cols  -> label 1
+    #   legitimate_users.txt         19,276 rows, 8 cols  -> label 0
+    #   content_polluters_tweets.txt  2,353,473 rows, 4 cols
+    #   legitimate_users_tweets.txt   3,259,693 rows, 4 cols
+    #   *_followings.txt             SEE THE WARNING BELOW
+    #
+    # `*_followings.txt` IS NOT AN EDGE LIST. The second field is a
+    # comma-separated list of NUMBERS and it is tempting to read it as followee
+    # ids. It is the release's `SeriesOfNumberOfFollowings` — a time series of
+    # the account's following COUNT at each probe. Three measurements settle it:
+    #   * the first value equals the profile's NumberOfFollowings in 2,948 of
+    #     3,000 sampled polluter rows;
+    #   * the maximum value anywhere is 118,047, while ids in this release run
+    #     to 173,766,965;
+    #   * 573 of 663,828 polluter values and 271 of 690,000 legitimate values
+    #     are ids of any labelled account here — i.e. chance.
+    # The file is therefore ignored and edges come from co-activity, exactly as
+    # on cresci_2017. There are no follow edges in this release.
+    #
+    # LEAKAGE — THE BIG ONE, AND IT CANNOT BE FULLY REMOVED.
+    # The honeypot ran on the two classes at different times, so the crawl
+    # windows are DISJOINT: legitimate users were collected 2009-11-12 to
+    # 2009-11-29, content polluters 2009-12-30 to 2010-08-02. 77% of legitimate
+    # tweets fall in 2009-10/2009-11 and 78% of polluter tweets in
+    # 2009-12..2010-07. Consequences and what is done about each:
+    #   * account_age_days is computed against each row's own `collected_at`,
+    #     never a fixed present day — otherwise it is a direct readout of which
+    #     file the row came from. (Guard applied; same as the botrepo parser.)
+    #   * burstiness, memory_coefficient, posting_entropy and circadian_
+    #     flatness are all RELATIVE to an account's own timeline and are
+    #     unaffected.
+    #   * synchrony_score and synchrony_partner_count use ABSOLUTE time, so
+    #     cross-class synchrony is impossible by construction here and every
+    #     synchronous pair is same-class. Co-activity edges inherit the same
+    #     bias, which is why the label assortativity of this graph is reported
+    #     alongside its ROC-AUC and the ROC-AUC is an upper bound, not a result.
+    # =====================================================================
+    manual_dir: ../DataSets/BotRepository/caverlee-2011
+    discovery:
+      # Exact tails: "**/content_polluters.txt" must not also catch
+      # content_polluters_tweets.txt or content_polluters_followings.txt.
+      polluter_profiles: ["**/content_polluters.txt"]
+      human_profiles:    ["**/legitimate_users.txt"]
+      polluter_tweets:   ["**/content_polluters_tweets.txt"]
+      human_tweets:      ["**/legitimate_users_tweets.txt"]
+    # 50, and this is a cost ceiling rather than a statistical choice.
+    # compute_synchrony pairs accounts inside 60-second buckets, and 77% of the
+    # 3.26M legitimate tweets land in a single month; at 200 tweets/account
+    # that month alone puts ~700k posts into ~43k buckets and the pair loop
+    # stops being affordable. 50 keeps ~1.6M posts, which is still four times
+    # the whole cresci_2017 timeline.
+    max_tweets_per_user: 50
+    edge_chunksize: 500000
+    build_coactivity_edges:
+      # No co_retweet / co_reply: the tweet row is four fields (user_id,
+      # tweet_id, text, created_at) and carries no reply or retweet id. There
+      # is also no screen_name column anywhere in the release, so @handles in
+      # the text cannot be resolved to accounts and `build_edges_from` would
+      # have nothing to work with — it is omitted rather than left empty.
+      co_hashtag: {field: hashtags,  relation: co_hashtag, min_accounts: 2, max_accounts: 60}
+      co_mention: {field: mentions,  relation: co_mention, min_accounts: 2, max_accounts: 60}
+      co_text:    {field: text_norm, relation: co_text,    min_accounts: 2, max_accounts: 30}
+    max_pairs_per_relation: 150000
+    # Applied. Unlike cresci-2017 the has-tweets rate is close to equal across
+    # the classes here, so the guard costs little; it is on so that accounts
+    # scored on an all-zero behavioural vector cannot inflate the number.
+    require_posts: true
+    # OFF, and left in the config with its arithmetic because the trade is not
+    # obvious. Clipping posts to the only window both classes share
+    # (2009-11-12..2009-11-29) would remove ~97% of polluter posts and, with
+    # require_posts on, most of the polluter accounts with them — trading a
+    # measurable bias for an unusable corpus. The bias is reported instead.
+    posts_time_window: {start: null, end: null}
+    era: legacy                    # honeypot ran Dec 2009 - Aug 2010
+    primary_source: manual
+    notes: >
+      Lee, Kyumin, Brian David Eoff, and James Caverlee. "Seven Months with the
+      Devils: A Long-Term Study of Content Polluters on Twitter." ICWSM 2011.
+      Texas A&M social-honeypot release. Supersedes the disabled
+      `botrepo_caverlee_2011` block below, which was written when only a
+      truncated .part download existed. Real tweet bodies and real timestamps;
+      no follow graph (see the followings warning above).
+
+  cresci_2019:
+    # DISABLED — not present. The folder "Cresci-2017 and Cresci-2019" is named
+    # for both but contains only the 2017 release (genuine_accounts +
+    # social_spambots_1). No cashtag-piggybacking files were found on disk.
+    # Get it from the Zenodo DOI below, drop it in, flip to true.
+    enabled: false
+    unavailable_reason: not_downloaded
+    manual_dir: ../DataSets/Cresci-2019
+    label_from_dirname:
+      human_patterns: ["genuine*", "*genuine*", "human*", "*legit*"]
+      bot_patterns:   ["*spam*", "*bot*", "*fake*", "*piggyback*"]
+    discovery:
+      users:  ["**/user*.csv", "**/user*.json", "**/account*.csv"]
+      tweets: ["**/tweet*.csv", "**/tweet*.json", "**/status*.csv"]
+      edges:  ["**/edge*.csv", "**/retweet*.csv", "**/friend*.csv", "**/follower*.csv"]
+    era: legacy                    # 2019 — Cashtag piggybacking / retweet rings
+    primary_source: manual
+    zenodo_doi: "10.5281/zenodo.2653525"
+    notes: >
+      Cresci et al. (2019) cashtag-piggybacking bots. Retweet-only accounts,
+      which is the purest form of the reciprocity+synchrony signature.
+
+  twibot_22:
+    # DISABLED — DataSets/TwiBot-22/ is the GITHUB SOURCE REPOSITORY, not the
+    # dataset: it holds src/ (baseline implementations), descriptions/, pics/
+    # and a README. There is no user.json, edge.csv, label.csv or split.csv.
+    # The actual graph is released only after signing the data-use agreement at
+    # the request_url below.
+    enabled: false
+    unavailable_reason: repo_only_no_data
+    manual_dir: ../DataSets/TwiBot-22
+    discovery:
+      users:  ["user.json", "user*.json", "node*.json"]
+      tweets: ["tweet_*.json", "tweet.json", "tweet*.json"]
+      edges:  ["edge.csv", "edge*.csv"]
+      labels: ["label.csv", "label*.csv"]
+      splits: ["split.csv", "split*.csv"]
+    stream_edges: true          # 170M rows: never load edge.csv in one go
+    edge_chunksize: 2000000
+    era: legacy                    # 2022 — pre-LLM graph benchmark
+    primary_source: manual         # request form: https://twibot22.github.io/
+    request_url: https://twibot22.github.io/
+    node_files: [user.json, tweet_*.json]
+    edge_files: [edge.csv]
+    label_file: label.csv
+    split_file: split.csv
+    relations: [follow, friend, post]
+    notes: >
+      TwiBot-22 (Feng et al., NeurIPS 2022 D&B). 1M users, 170M edges,
+      heterogeneous relation types. The standard graph benchmark; requires
+      signing a data-use agreement, hence primary_source=manual.
+
+  twibot_24:
+    # ---------------------------------------------------------------------
+    # DISABLED — not present on disk in any form.
+    #
+    # This is the dataset the project spec names as notebook 03's target, so
+    # be aware of the substitution: notebook 03 currently trains on
+    # `cresci_2017` (real, tweet-derived interaction graph) and validates the
+    # 2026 threat model on `synthetic_campaign`. The GNN code, the feature
+    # extractor and the loader are all relation-type aware and were written
+    # against the TwiBot-24 schema, so the ONLY thing needed to switch is:
+    #   1. request access at https://twibot24.github.io/
+    #   2. drop user.json / edge.csv / label.csv / split.csv into
+    #      DataSets/TwiBot-24/
+    #   3. set graph_model.external_diagnostic_dataset: twibot_24, or add it
+    #      as a new campaign/source holdout without random node splitting.
+    # Nothing else in notebook 03 changes.
+    # ---------------------------------------------------------------------
+    enabled: false
+    unavailable_reason: not_downloaded
+    manual_dir: ../DataSets/TwiBot-24
+    discovery:
+      users:  ["user.json", "user*.json", "node*.json"]
+      tweets: ["tweet.json", "tweet_*.json", "tweet*.json"]
+      edges:  ["edge.csv", "edge*.csv"]
+      labels: ["label.csv", "label*.csv"]
+      splits: ["split.csv", "split*.csv"]
+    stream_edges: true
+    edge_chunksize: 2000000
+    era: frontier                  # 2024 — LLM-powered bots, multi-relational
+    primary_source: manual         # request form: https://twibot24.github.io/
+    request_url: https://twibot24.github.io/
+    node_files: [user.json, tweet.json]
+    edge_files: [edge.csv]
+    label_file: label.csv
+    split_file: split.csv
+    relations:
+      [followers, following, post, mentioned, retweeted, quoted, replied_to, membership, pinned, discuss, own]
+    notes: >
+      TwiBot-24 (Feng et al., 2024). ~1M users with FOURTEEN relation types and
+      a bot population that includes LLM-driven accounts whose *text* is often
+      indistinguishable from human. That is precisely why text-only detection
+      collapses on it and the graph branch becomes load-bearing. This is the
+      intended target dataset for notebook 03 once access is granted.
+
+  twitter_bot_detection_kaggle:
+    # =====================================================================
+    # DISABLED — MEASURED TO BE PURE NOISE. Do not re-enable.
+    #
+    # File: DataSets/Twitter Bot Detection Dataset/bot_detection_data.csv
+    #       50,000 rows, labels a perfect 25,018 / 24,982 split.
+    #
+    # It looks usable (Retweet Count, Mention Count, Follower Count, Verified,
+    # Bot Label, Created At, Hashtags) but the entire table is Faker-generated
+    # and the labels are assigned at random. Measured on the full 50k rows:
+    #
+    #   RandomForest on the 6 tabular features, 3-fold ROC-AUC = 0.4959
+    #   tf-idf + LogisticRegression on the tweet text, 3-fold ROC-AUC = 0.4993
+    #
+    #   class-conditional feature means (human / bot):
+    #       retweet_count    49.969 / 50.042
+    #       mention_count     2.526 /  2.502
+    #       follower_count 4985.256 / 4991.944
+    #       verified_rate     0.501 /  0.499
+    #   identical to three decimals — there is nothing to learn.
+    #
+    # It is also structurally unusable for the graph branch: 50,000 unique
+    # User IDs over 50,000 rows (exactly one post per account, so no temporal
+    # profile), zero "@" characters in any tweet (so no mention edges), and the
+    # Hashtags column is random word salad ("both live", "phone ahead").
+    #
+    # Kept in the config, disabled, WITH the numbers, because "we evaluated
+    # this source and rejected it for cause" is a better answer at a review
+    # than silence — and it stops anyone re-adding it later.
+    # =====================================================================
+    enabled: false
+    unavailable_reason: synthetic_kaggle_noise_auc_0.50
+    manual_dir: ../DataSets/Twitter Bot Detection Dataset
+    era: unusable
+    primary_source: kaggle
+    notes: >
+      Rejected. Faker-generated rows with randomly assigned labels; both a
+      tabular and a text baseline score chance (ROC-AUC ~0.50).
+
+  # =========================================================================
+  # OSoMe BOT REPOSITORY  —  botometer.osome.iu.edu/bot-repository
+  #
+  # Fifteen archives downloaded to DataSets/BotRepository/<name>/. Every one
+  # was opened and inspected before being wired in; the full evidence table is
+  # in docs/BOT_REPOSITORY.md. Three findings drive everything below.
+  #
+  # 1. THE FILE NAMED `<name>_tweets.json` CONTAINS NO TWEET TEXT.
+  #    Measured across all ten sets that ship one: every element has exactly
+  #    two keys, `created_at` and `user`. That is a hydrated user object plus
+  #    the timestamp of the probe that fetched it. 0 of 62,595 elements carry
+  #    `text` or `full_text`, and no account appears twice. Twitter's ToS is
+  #    why — OSoMe is permitted to redistribute profiles, not tweet bodies.
+  #
+  #    CONSEQUENCE: these support the PROFILE features only. No post timeline
+  #    means synchrony / burstiness / posting-entropy / content-reuse are all
+  #    structurally zero, and no edge list means the five structural features
+  #    are zero too. `build_features` already degrades to exactly that and says
+  #    so in the log. They are wired in for LABEL DIVERSITY, not to replace
+  #    cresci_2017, which remains the only corpus here with a real graph.
+  #
+  # 2. SIX OF THE ELEVEN USABLE SETS ARE SINGLE-CLASS BY DESIGN.
+  #    botwiki / celebrity / political-bots / pronbots / vendor-purchased /
+  #    verified-2019 contain only bots or only humans. That is intentional on
+  #    OSoMe's part — the documented usage is to mix a bot set with a human
+  #    set. They are enabled because `load_bot_repository_corpus` is what
+  #    consumes them; each one on its own is a degenerate training task and
+  #    the loader logs a SINGLE-CLASS warning if you try.
+  #
+  # 3. THE JOIN TO THE USER OBJECTS IS A LEAKAGE GUARD, NOT HOUSEKEEPING.
+  #    Hydration coverage is not independent of the label. On cresci-stock-2018
+  #    only 38.4% of bots survived the 2019 re-crawl against 82.6% of humans
+  #    (11,406 of 18,508 bots vs 1,305 of 7,479 humans have no user object).
+  #    The parser inner-joins and drops them. Kept with zeroed profile fields
+  #    they would hand a model most of its accuracy for learning "empty profile
+  #    => bot", which is a property of the crawl, not of automation. Same
+  #    argument as `require_posts` on cresci_2017 above.
+  #
+  # Naming: every block is prefixed `botrepo_` so provenance is obvious in the
+  # manifest and so the Bot Repository's 1M-row twibot-22 LABEL FILE cannot be
+  # confused with the `twibot_22` block above (which points at the GitHub
+  # source repo). All of them share one discovery + alias table, defined once
+  # on the first block as a YAML anchor and merged into the rest.
+  # =========================================================================
+
+  botrepo_botometer_feedback_2019:
+    enabled: true
+    manual_dir: ../DataSets/BotRepository/botometer-feedback-2019
+    # `<name>.tsv` is HEADERLESS (id TAB label) — the parser reads it with
+    # header=None rather than through local_store.read_any, which would eat the
+    # first account and name the columns after it.
+    discovery: &botrepo_discovery
+      labels: ["**/*.tsv"]
+      users:  ["**/*_tweets.json", "**/*_processed_user_objects.json"]
+    # Two shapes, one table. The ten `_tweets.json` sets nest everything under
+    # `user.*` (json_normalize flattens it to `user.followers_count`); the
+    # midterm-2018 `_processed_user_objects.json` is already flat and uses
+    # `user_id` / `user_created_at`. Nested aliases are listed FIRST because
+    # resolve_column tries every alias exactly before it tries substrings.
+    column_aliases: &botrepo_aliases
+      user_id:            [user.id_str, user_id, user.id, id]
+      screen_name:        [user.screen_name, screen_name]
+      followers:          [user.followers_count, followers_count]
+      following:          [user.friends_count, friends_count]
+      statuses:           [user.statuses_count, statuses_count]
+      description:        [user.description, description]
+      verified:           [user.verified, verified]
+      account_created_at: [user.created_at, user_created_at]
+      # Age is measured against the PROBE time carried by each record, not
+      # against a fixed present day. A fixed reference would turn
+      # account_age_days into a proxy for which crawl the row came from, and
+      # the crawls have very different label balances — straight leakage in
+      # the combined corpus.
+      probe_at:           [created_at, probe_timestamp]
+    era: legacy                    # crawled 2018-2019
+    primary_source: manual
+    # 529 rows / 528 unique ids (one duplicate), 385 human / 143 bot.
+    # 518 join to a user object -> 379 human / 139 bot.
+    notes: >
+      Yang, Kai-Cheng, Onur Varol, Clayton A. Davis, Emilio Ferrara,
+      Alessandro Flammini, and Filippo Menczer. "Arming the public with
+      artificial intelligence to counter social bots." Human Behavior and
+      Emerging Technologies 1, no. 1 (2019): 48-61. CC BY-NC-ND 4.0.
+      Botometer feedback accounts hand-labelled by K.C. Yang — the closest
+      thing here to an in-the-wild mixed sample. Profile features only.
+
+  botrepo_botwiki_2019:
+    # SINGLE-CLASS (bots only) — see finding 2 in the block comment above.
+    enabled: true
+    manual_dir: ../DataSets/BotRepository/botwiki-2019
+    discovery: *botrepo_discovery
+    column_aliases: *botrepo_aliases
+    era: legacy                    # crawled 2019
+    primary_source: manual
+    # 704 ids, all label=bot. 698 join to a user object.
+    notes: >
+      Yang, Kai-Cheng, Onur Varol, Pik-Mai Hui, and Filippo Menczer.
+      "Scalable and generalizable social bot detection through data
+      selection." AAAI 34, no. 01 (2020): 1096-1103. CC BY-NC-ND 4.0.
+      SELF-IDENTIFIED bots from botwiki.org — benign, openly-declared
+      automation (art bots, weather bots). Valuable precisely because they are
+      the hardest positive class to justify flagging, and a detector that
+      cannot tell them from a pronbot is measuring "is automated", not
+      "is adversarial". Profile features only.
+
+  botrepo_celebrity_2019:
+    # SINGLE-CLASS (humans only).
+    enabled: true
+    manual_dir: ../DataSets/BotRepository/celebrity-2019
+    discovery: *botrepo_discovery
+    column_aliases: *botrepo_aliases
+    era: legacy                    # crawled 2018-2019
+    primary_source: manual
+    # 5,970 ids, all label=human. The user-object file holds 20,983 profiles,
+    # of which only 5,918 appear in the label file; the other 15,065 are
+    # unlabelled crawl residue and are dropped by the inner join.
+    notes: >
+      Yang, Kai-Cheng, Onur Varol, Clayton A. Davis, Emilio Ferrara,
+      Alessandro Flammini, and Filippo Menczer. "Arming the public with
+      artificial intelligence to counter social bots." Human Behavior and
+      Emerging Technologies 1, no. 1 (2019): 48-61. CC BY-NC-ND 4.0.
+      Celebrity accounts used as authentic humans. Note the sampling bias:
+      these are high-follower broadcast accounts, so they anchor the human
+      class at the opposite end of the followers/following ratio from the
+      fake-follower bots. Profile features only.
+
+  botrepo_cresci_rtbust_2019:
+    enabled: true
+    manual_dir: ../DataSets/BotRepository/cresci-rtbust-2019
+    discovery: *botrepo_discovery
+    column_aliases: *botrepo_aliases
+    era: legacy                    # crawled 2018-2019
+    primary_source: manual
+    # 759 ids, 368 human / 391 bot — the most balanced set in the family.
+    # 693 join to a user object -> 340 human / 353 bot.
+    notes: >
+      Mazza, Michele, Stefano Cresci, Marco Avvenuti, Walter Quattrociocchi,
+      and Maurizio Tesconi. "RTbust: Exploiting temporal patterns for botnet
+      detection on Twitter." WebSci 2019, pp. 183-192.
+      doi:10.5281/zenodo.2653137. Manually annotated Italian retweet-botnet
+      accounts. The RTbust paper's own method is temporal, and the temporal
+      data is exactly what this redistribution strips — profile features only.
+
+  botrepo_cresci_stock_2018:
+    enabled: true
+    manual_dir: ../DataSets/BotRepository/cresci-stock-2018
+    discovery: *botrepo_discovery
+    column_aliases: *botrepo_aliases
+    era: legacy                    # crawled 2018
+    primary_source: manual
+    # 25,987 ids, 7,479 human / 18,508 bot. Only 13,276 (51.1%) join to a user
+    # object, and the loss is label-dependent: 61.6% of bots vs 17.5% of
+    # humans. Post-join it is 6,174 human / 7,102 bot — nearly balanced, but
+    # the survivors are the bots that were still alive in 2019, so treat this
+    # as a sample of *durable* stock spam, not of stock spam.
+    notes: >
+      Cresci, Stefano, Fabrizio Lillo, Daniele Regoli, Serena Tardelli, and
+      Maurizio Tesconi. "$FAKE: Evidence of Spam and Bot Activity in Stock
+      Microblogs on Twitter." ICWSM 2018; and "Cashtag piggybacking:
+      Uncovering spam and bot activity in stock microblogs on Twitter." ACM
+      TWEB 13, no. 2 (2019): 11. doi:10.5281/zenodo.2686862.
+      This is the cashtag-piggybacking corpus that the disabled `cresci_2019`
+      block above is waiting for — but only the account layer of it, so it
+      does not close that gap. Profile features only.
+
+  botrepo_gilani_2017:
+    enabled: true
+    manual_dir: ../DataSets/BotRepository/gilani-2017
+    discovery: *botrepo_discovery
+    column_aliases: *botrepo_aliases
+    era: legacy                    # annotated 2017
+    primary_source: manual
+    # 2,652 rows / 2,633 unique ids (19 duplicates), 1,111 bot / 1,522 human.
+    # 2,484 join to a user object -> 1,071 bot / 1,413 human.
+    notes: >
+      Gilani, Zafar, Reza Farahbakhsh, Gareth Tyson, Liang Wang, and Jon
+      Crowcroft. "Of bots and humans (on Twitter)." ASONAM 2017, pp. 349-354.
+      Manually annotated across four follower-count bands, which makes it the
+      least follower-biased general sample in the family. Profile features only.
+
+  botrepo_midterm_2018:
+    enabled: true
+    manual_dir: ../DataSets/BotRepository/midterm-2018
+    discovery: *botrepo_discovery
+    column_aliases: *botrepo_aliases
+    era: legacy                    # crawled around the Nov 2018 US midterms
+    primary_source: manual
+    # 50,538 ids, 42,446 bot / 8,092 human — the largest usable set here, and
+    # the only one with 100% user-object coverage, because it ships flattened
+    # `_processed_user_objects.json` rather than re-crawled profiles.
+    # Different key names (`user_id`, `user_created_at`, `probe_timestamp`),
+    # handled by the shared alias table.
+    notes: >
+      Yang, Kai-Cheng, Onur Varol, Pik-Mai Hui, and Filippo Menczer.
+      "Scalable and generalizable social bot detection through data
+      selection." AAAI 34, no. 01 (2020): 1096-1103. CC BY-NC-ND 4.0.
+      Political accounts around the 2018 US midterms. Dominates the combined
+      corpus by volume (53% of it), so any model trained on the union should
+      be checked leave-one-corpus-out with this one held out.
+      Profile features only.
+
+  botrepo_political_bots_2019:
+    # SINGLE-CLASS (bots only), and tiny — 62 accounts.
+    enabled: true
+    manual_dir: ../DataSets/BotRepository/political-bots-2019
+    discovery: *botrepo_discovery
+    column_aliases: *botrepo_aliases
+    era: legacy                    # crawled 2019
+    primary_source: manual
+    # 62 ids, all label=bot, all 62 join to a user object.
+    notes: >
+      Yang, Kai-Cheng, Onur Varol, Clayton A. Davis, Emilio Ferrara,
+      Alessandro Flammini, and Filippo Menczer. "Arming the public with
+      artificial intelligence to counter social bots." Human Behavior and
+      Emerging Technologies 1, no. 1 (2019): 48-61. CC BY-NC-ND 4.0.
+      A single operator's political bot fleet (@rzazula, since suspended).
+      Too small to matter statistically; kept because it is one coherent
+      campaign and is therefore useful as a named slice when auditing which
+      bot types a model misses. Profile features only.
+
+  botrepo_pronbots_2019:
+    # SINGLE-CLASS (bots only).
+    enabled: true
+    manual_dir: ../DataSets/BotRepository/pronbots-2019
+    discovery: *botrepo_discovery
+    column_aliases: *botrepo_aliases
+    era: legacy                    # crawled 2018-2019
+    primary_source: manual
+    # 21,964 ids, all label=bot. 17,882 (81.4%) join to a user object.
+    notes: >
+      Yang, Kai-Cheng, Onur Varol, Clayton A. Davis, Emilio Ferrara,
+      Alessandro Flammini, and Filippo Menczer. "Arming the public with
+      artificial intelligence to counter social bots." Human Behavior and
+      Emerging Technologies 1, no. 1 (2019): 48-61. CC BY-NC-ND 4.0.
+      Scam/spam bots harvested by Andy Patel (github.com/r0zetta/pronbot2).
+      Mass-registered, near-identical profiles — the easiest positive class in
+      the family, and the one most likely to flatter a headline number.
+      Profile features only.
+
+  botrepo_vendor_purchased_2019:
+    # SINGLE-CLASS (bots only).
+    enabled: true
+    manual_dir: ../DataSets/BotRepository/vendor-purchased-2019
+    discovery: *botrepo_discovery
+    column_aliases: *botrepo_aliases
+    era: legacy                    # crawled 2018-2019
+    primary_source: manual
+    # 1,088 ids, all label=bot. 1,087 join to a user object.
+    notes: >
+      Yang, Kai-Cheng, Onur Varol, Clayton A. Davis, Emilio Ferrara,
+      Alessandro Flammini, and Filippo Menczer. "Arming the public with
+      artificial intelligence to counter social bots." Human Behavior and
+      Emerging Technologies 1, no. 1 (2019): 48-61. CC BY-NC-ND 4.0.
+      Fake followers bought from several vendors — ground truth in the
+      strongest sense available, since the label comes from having paid for
+      them. Classic signature: default profile image, near-zero statuses,
+      high following. Profile features only.
+
+  botrepo_verified_2019:
+    # SINGLE-CLASS (humans only).
+    enabled: true
+    manual_dir: ../DataSets/BotRepository/verified-2019
+    discovery: *botrepo_discovery
+    column_aliases: *botrepo_aliases
+    era: legacy                    # crawled 2019
+    primary_source: manual
+    # 2,000 ids, all label=human. 1,987 join to a user object.
+    notes: >
+      Yang, Kai-Cheng, Onur Varol, Pik-Mai Hui, and Filippo Menczer.
+      "Scalable and generalizable social bot detection through data
+      selection." AAAI 34, no. 01 (2020): 1096-1103. CC BY-NC-ND 4.0.
+      Verified accounts used as authentic humans. Carries the same caveat as
+      celebrity-2019 and an extra one: `verified` is itself a node feature, so
+      on the combined corpus it is partly a label proxy for these 1,987 rows.
+      Profile features only.
+
+  # ---- Rejected Bot Repository sets. Evidence, not omission. --------------
+
+  botrepo_astroturf:
+    # DISABLED — IDs AND LABELS ONLY, NOTHING TO FEATURISE.
+    # astroturf.tar.gz contains exactly one member: astroturf.tsv, 585 rows of
+    # "<user_id>\tpolitical_Bot". There is no user-object file and no tweet
+    # file, so every profile field would be null and every graph field zero.
+    # Usable only after Twitter API hydration, which is not available.
+    enabled: false
+    unavailable_reason: ids_and_labels_only_no_user_objects
+    manual_dir: ../DataSets/BotRepository/astroturf
+    discovery: *botrepo_discovery
+    column_aliases: *botrepo_aliases
+    era: unusable
+    primary_source: manual
+    notes: >
+      Sayyadiharikandeh, Mohsen, Onur Varol, Kai-Cheng Yang, Alessandro
+      Flammini, and Filippo Menczer. "Detection of Novel Social Bots by
+      Ensembles of Specialized Classifiers." CIKM 2020. CC BY-NC-ND 4.0.
+      Rejected: 585 account ids, all labelled political_Bot, with no user
+      objects and no tweets shipped.
+
+  botrepo_varol_2017:
+    # DISABLED — IDs AND LABELS ONLY.
+    # varol-2017.dat.gz decompresses to 2,573 rows of "<user_id>\t<0|1>",
+    # 1,747 label=0 and 826 label=1. No user objects, no tweets. The 2016
+    # crawl the paper used was never redistributed.
+    enabled: false
+    unavailable_reason: ids_and_labels_only_no_user_objects
+    manual_dir: ../DataSets/BotRepository/varol-2017
+    discovery: *botrepo_discovery
+    column_aliases: *botrepo_aliases
+    era: unusable
+    primary_source: manual
+    notes: >
+      Varol, Onur, Emilio Ferrara, Clayton A. Davis, Filippo Menczer, and
+      Alessandro Flammini. "Online Human-Bot Interactions: Detection,
+      Estimation, and Characterization." ICWSM 2017. CC BY-NC-ND 4.0.
+      Rejected: annotation file only (2,573 ids + binary label), no profiles.
+
+  botrepo_twibot_22:
+    # DISABLED — IDs AND LABELS ONLY, and only a sample.
+    # twibot-22.csv.gz is a real CSV with header "id,label" and 1,000,000 rows
+    # (860,057 human / 139,943 bot), ids prefixed "u". That is the label file
+    # of TwiBot-22 and nothing else: no user.json, no tweet_*.json, no
+    # edge.csv. It cannot be joined to anything on disk — the ids do not
+    # appear in any other corpus here — so it is a million labels for accounts
+    # we have no features for. The full release still needs the data-use
+    # agreement; see the `twibot_22` block above.
+    enabled: false
+    unavailable_reason: label_file_only_no_features
+    manual_dir: ../DataSets/BotRepository/twibot-22
+    discovery: *botrepo_discovery
+    column_aliases: *botrepo_aliases
+    era: unusable
+    primary_source: manual
+    request_url: https://twibot22.github.io/
+    notes: >
+      Feng, Shangbin, Zhaoxuan Tan, Herun Wan, Ningnan Wang, Zilong Chen, et
+      al. "TwiBot-22: Towards Graph-Based Twitter Bot Detection."
+      arXiv:2206.04564 (2022). Rejected: label file only.
+
+  botrepo_twibot_20:
+    # DISABLED — RICH BUT UNLABELLED.
+    # twibot20.json is a 100-record SAMPLE and is the most feature-complete
+    # file in the whole download: each record has ID, a full `profile` object,
+    # a `tweet` list (17,372 tweet texts in total, median 200 per account) and
+    # a `neighbor` object with follower/following id lists on 62 of the 100.
+    # It has NO `label` key on any record (verified: 100/100 missing), which
+    # makes it useless for supervised training — and the neighbour lists are
+    # useless too, because only 30 of the 1,098 referenced ids are inside the
+    # sample, so the induced graph is 30 edges over 100 nodes.
+    # This is the one worth re-requesting: the full TwiBot-20 release has both
+    # labels and text, which would give the graph branch its second real
+    # interaction graph.
+    enabled: false
+    unavailable_reason: sample_without_labels
+    manual_dir: ../DataSets/BotRepository/twibot-20
+    discovery: *botrepo_discovery
+    column_aliases: *botrepo_aliases
+    era: unusable
+    primary_source: manual
+    request_url: https://twibot20.github.io/
+    notes: >
+      Feng, Shangbin, Herun Wan, Ningnan Wang, Jundong Li, and Minnan Luo.
+      "TwiBot-20: A Comprehensive Twitter Bot Detection Benchmark." CIKM 2021.
+      Rejected: the public sample is 100 records with profiles, tweets and
+      neighbour lists but no labels. Contact the authors for the full set.
+
+  botrepo_caverlee_2011:
+    # DISABLED — SUPERSEDED, NOT MISSING.
+    # This block was written while caverlee-2011.zip was still downloading and
+    # only a 217 MB .part file existed. The download has since completed
+    # (263.7 MB, verified intact) and the release turned out to be nothing like
+    # the other Bot Repository sets: no <name>.tsv label file, no hydrated user
+    # objects, but 41,455 accounts and 5.6M real tweet bodies. It therefore
+    # cannot use `_local_bot_repository` at all and has its own block and
+    # loader — see `caverlee_2011` above. Left here, disabled, so that the
+    # botrepo_* family stays a complete inventory of the download.
+    enabled: false
+    unavailable_reason: superseded_by_caverlee_2011_block
+    manual_dir: ../DataSets/BotRepository/caverlee-2011
+    discovery: *botrepo_discovery
+    column_aliases: *botrepo_aliases
+    era: unusable
+    primary_source: manual
+    notes: >
+      Lee, Kyumin, Brian David Eoff, and James Caverlee. "Seven Months with
+      the Devils: A Long-Term Study of Content Polluters on Twitter." ICWSM
+      2011. Superseded by the `caverlee_2011` block, which loads the completed
+      download with its real tweet timelines.
+
+# ---------------------------------------------------------------------------
+# SYNTHETIC AGENTIC CAMPAIGN — the 2026 threat simulation
+# ---------------------------------------------------------------------------
+synthetic:
+  enabled: true
+  backend: offline                 # offline | openai | anthropic  (env overrides)
+  # Which campaign archetype to generate. See aegis.synthetic_agents.SCENARIOS.
+  #   product_shill   a coordinated swarm promoting a fictional product —
+  #                   fake testimonials, invented results, a shared discount
+  #                   code, review brigading.
+  #   civic_disinfo   a coordinated swarm manufacturing opposition to a
+  #                   fictional municipal project.
+  # Both are generated offline against fictional targets for defensive research.
+  # Generate both and concatenate for a harder, more varied corpus — the two have
+  # genuinely different burstiness and duplication profiles, so a detector trained
+  # on one alone learns the wrong invariant.
+  scenario: product_shill
+  n_agents: 8                      # spec: 5–10 coordinating agents
+  n_human_decoys: 40               # organic accounts so the graph is not trivially separable
+  campaign_turns: 14               # orchestration rounds
+  posts_per_agent_per_turn: [1, 3]
+  seed: 1337
+
+  campaigns:
+    # ---------------------------------------------------------------------
+    # The "coordinated bot swarm promoting a fake product" scenario.
+    # Personas span the archetypes a real shill network uses: an ordinary-user
+    # seeder, a credentialed-sounding authority, influencer amplifiers, a
+    # "former sceptic" for social proof, a fake reviewer for legitimacy, and a
+    # controller. AURA-9 does not exist.
+    # ---------------------------------------------------------------------
+    product_shill:
+      codename: OPERATION_SUNFLARE
+      objective: >
+        Manufacture the appearance of organic, enthusiastic word-of-mouth for a
+        fictional supplement brand ("AURA-9 Daily Glow") so that it appears
+        independently validated by real customers ahead of a retail launch.
+      target_entity: AURA-9
+      hashtags: ["#AURA9", "#GlowFromWithin", "#AURA9Results", "#DailyGlow"]
+      personas:
+        - {handle: mia_wellnesss,     archetype: everyday_user,       role: seeder}
+        - {handle: dr_reyna_holistic, archetype: fake_expert,         role: authority_proxy}
+        - {handle: liftwithcallum,    archetype: fitness_influencer,  role: amplifier}
+        - {handle: thriftymumof3,     archetype: budget_shopper,      role: amplifier}
+        - {handle: theglowjournal,    archetype: wellness_blogger,    role: cross_community_bridge}
+        - {handle: jord_wasdoubtful,  archetype: sceptic_convert,     role: amplifier}
+        - {handle: honest_reviews_uk, archetype: pseudo_reviewer,     role: legitimiser}
+        - {handle: orchestrator_00,   archetype: controller,          role: orchestrator}
+
+    # ---------------------------------------------------------------------
+    # The original civic-disinformation scenario, kept as the second archetype.
+    # Deliberately shared narrative frames -> creates the co-hashtag /
+    # co-narrative edges that the GNN must learn to see.
+    # ---------------------------------------------------------------------
+    civic_disinfo:
+      codename: OPERATION_GLASSHOUSE
+      objective: >
+        Manufacture the appearance of grassroots consensus that a fictional
+        municipal water-treatment retrofit ("Project Clearwater") is unsafe,
+        in order to stall a fictional city-council vote.
+      target_entity: Project Clearwater
+      hashtags: ["#ClearwaterFacts", "#StopTheRetrofit", "#WaterSafetyNow", "#AuditClearwater"]
+      personas:
+        - {handle: mara_civicwatch,   archetype: concerned_parent,      role: seeder}
+        - {handle: dtl_engineering,   archetype: fake_expert,           role: authority_proxy}
+        - {handle: riverside_ana,     archetype: local_resident,        role: amplifier}
+        - {handle: budget_hawk_kj,    archetype: fiscal_conservative,   role: amplifier}
+        - {handle: greenline_collab,  archetype: environmental_activist, role: cross_community_bridge}
+        - {handle: nightshift_tom,    archetype: working_class_voice,   role: amplifier}
+        - {handle: civicdata_bot,     archetype: pseudo_factchecker,    role: legitimiser}
+        - {handle: orchestrator_00,   archetype: controller,            role: orchestrator}
+  # A small number of agent turns intentionally carry an injection payload so
+  # the text branch has in-domain 2026 adversarial examples.
+  injection_payload_rate: 0.12
+  # Independent graph groups for inductive and leave-one-campaign-out
+  # validation. Campaign ids are `<scenario>__seed_<seed>` and all account ids
+  # are namespaced before the frames are concatenated.
+  campaign_bank:
+    scenarios: [product_shill, civic_disinfo]
+    seeds: [1337, 2027, 3119]
+
+# ---------------------------------------------------------------------------
+# MODEL HYPER-PARAMETERS
+# ---------------------------------------------------------------------------
+text_model:
+  # Corpora notebook 02 trains on, in the order they are concatenated.
+  # tweepfake and wildguard are absent (see text_datasets) — llm_tweet and
+  # deepset_injections take their places.
+  train_datasets: [hc3, m4, wildjailbreak, llm_tweet, deepset_injections, synthetic_campaign_text]
+  # Generators held out of TRAINING entirely, then scored separately. This is
+  # the cross-generator generalisation number: a 2026 agent will not use a
+  # generator that was in your training set, so an in-distribution F1 is a
+  # vanity metric.
+  holdout_generators: [cohere, flant5]
+  base_checkpoint: microsoft/deberta-v3-base
+  max_length: 256
+  num_labels: 2
+  epochs: 4
+  batch_size: 16
+  eval_batch_size: 64
+  gradient_accumulation_steps: 2
+  max_grad_norm: 1.0
+  learning_rate: 2.0e-5
+  weight_decay: 0.01
+  warmup_ratio: 0.06
+  lr_scheduler: linear
+  fp16: auto                       # auto -> on iff CUDA
+  early_stopping_patience: 2
+  metric_for_best_model: eval_f1
+  use_class_weights: true
+  freeze_embeddings: false
+  output_dir: models/text_model
+
+graph_model:
+  # Notebook 03 trains on disconnected campaign-bank graphs. This corpus is
+  # loaded by notebook 01 and scored only as an external diagnostic.
+  external_diagnostic_dataset: cresci_2017
+  architecture: sage              # sage | gat | rgcn
+  hidden_channels: 128
+  num_layers: 2
+  heads: 4                        # GAT only
+  dropout: 0.4
+  input_dropout: 0.3
+  edge_dropout: 0.3
+  learning_rate: 5.0e-3
+  weight_decay: 5.0e-4
+  epochs: 200
+  early_stopping_patience: 30
+  neighbor_sampling: [15, 10]     # NeighborLoader fan-out for large graphs
+  batch_size: 512
+  # Behavioural features fed alongside structural ones. These are the
+  # "coordination physics" of a swarm.
+  features:
+    - synchrony_score             # ||co-posting within Δt|| vs null model
+    - synchrony_partner_count
+    - reciprocity                 # local edge reciprocity
+    - clustering_coefficient
+    - in_degree
+    - out_degree
+    - degree_ratio
+    - burstiness                  # Goh & Barabási burstiness of inter-post times
+    - memory_coefficient
+    - posting_entropy             # Shannon entropy over hour-of-day histogram
+    - circadian_flatness          # 1 - normalised amplitude of daily rhythm
+    - content_duplication_ratio   # near-dup posts within the account
+    - cross_account_dup_ratio     # near-dup posts shared with neighbours
+    - hashtag_jaccard_mean        # mean co-hashtag overlap with neighbours
+  synchrony_window_seconds: 60    # "exact same time" tolerance
+  synchrony_min_events: 3
+  # Near-duplicate Jaccard cut for the content-reuse features. See the docstring
+  # of graph_features.compute_content_features for the measured separation
+  # curve: 0.85 is inverted, ~0.55 peaks, 0.75 is the documented compromise.
+  content_dup_threshold: 0.75
+  output_dir: models/graph_model
+
+fusion_model:
+  # Late fusion: keep the two branches independently auditable, then learn the
+  # combination. Also fits the deployment reality that text and graph evidence
+  # arrive on different latencies.
+  strategy: stacking              # stacking | weighted | rules
+  meta_learner: logistic          # logistic | lightgbm | mlp
+  calibrate: auto                 # sigmoid until isotonic has enough support
+  stacking_c: 1.0
+  min_stacking_macro_gain: 0.01
+  isotonic_min_class_samples: 500
+  text_inference_batch_size: 64
+  weighted_baseline:
+    w_text: 0.45
+    w_graph: 0.55
+  decision_thresholds:            # analyst-facing triage bands
+    monitor: 0.35
+    investigate: 0.60
+    escalate: 0.82
+  # Cost-sensitive: a missed swarm is ~4x worse than a false positive here,
+  # but false positives are what destroy analyst trust, so we tune F-beta.
+  fbeta: 1.5
+  output_dir: models/fusion_model
+
+# ---------------------------------------------------------------------------
+# PATHS (relative to repo root; resolved by aegis.config.Paths)
+# ---------------------------------------------------------------------------
+paths:
+  data_raw: data/raw
+  data_interim: data/interim
+  data_processed: data/processed
+  data_external: data/external
+  data_synthetic: data/synthetic
+  models: models
+  reports: reports
+  figures: reports/figures
