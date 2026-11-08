@@ -1,0 +1,59 @@
+/* ==========================================================================
+   AGENTINTHESHELL EDITIONS WINTER '26 — DESIGN TOKENS
+   Inspired by Shopify Editions Winter '26 ("The RenAIssance Edition")
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800;900&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+:root {
+  /* Obsidian Velvet Palette (Dark Chapters) */
+  --bg-dark: #070709;
+  --bg-dark-alt: #0e0e12;
+  --bg-dark-surface: #14141a;
+  --bg-dark-elevated: #1a1a24;
+  --line-dark: rgba(255, 255, 255, 0.08);
+  --line-dark-gold: rgba(212, 175, 55, 0.22);
+  --text-dark-primary: #f5f4ef;
+  --text-dark-secondary: #c8c7be;
+  --text-dark-dim: #7e7d75;
+
+  /* Florentine Warm Parchment Palette (Chapter 03) */
+  --bg-parchment: #f7f6f0;
+  --bg-parchment-alt: #ece9dd;
+  --bg-parchment-surface: #ffffff;
+  --line-parchment: rgba(0, 0, 0, 0.08);
+  --line-parchment-gold: rgba(184, 150, 40, 0.35);
+  --text-parchment-primary: #161614;
+  --text-parchment-secondary: #3d3d37;
+  --text-parchment-dim: #6b6a62;
+
+  /* Renaissance Gold & Accent Highlights */
+  --gold: #d4af37;
+  --gold-light: #f3e5ab;
+  --gold-dark: #aa8524;
+  --ember: #eb5757;
+  --cyan: #62e6f0;
+  --violet: #a78bfa;
+  --danger: #f87171;
+  --success: #34d399;
+
+  /* Typography Stacks */
+  --font-display: 'Cinzel', 'Times New Roman', serif;
+  --font-serif: 'Newsreader', 'EB Garamond', Georgia, serif;
+  --font-sans: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-grotesk: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Spatial Z-Index Stacking (3-Layer Depth Sandwich) */
+  --z-canvas-bg: 1;
+  --z-layer-back: 10;
+  --z-layer-mid: 20;
+  --z-layer-front: 30;
+  --z-overlay: 40;
+  --z-nav: 50;
+  --z-modal: 100;
+
+  /* Animation Timings */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-smooth: cubic-bezier(0.65, 0, 0.35, 1);
+}
