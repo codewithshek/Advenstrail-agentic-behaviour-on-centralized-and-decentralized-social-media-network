@@ -204,6 +204,30 @@ reproducibility and may transmit prompts to an external provider.
 - inner out-of-group predictions select model and threshold;
 - one outer campaign is scored only after choices are fixed.
 
+## Architecture-Specific Benchmark Fixtures
+
+To empirically validate network architecture classification and attack differentiation, four deterministic benchmark fixtures are exported under `datasets/fixtures/` and `Testing-files/` (JSON & CSV), and `data/synthetic/` (Parquet):
+
+1. **`centralized_x_hashtag_flood`**
+   - *Architecture*: Centralized (`x.com`)
+   - *Attack Profile*: Synchronized Hashtag Flood & Retweet Ring
+   - *Properties*: Single global namespace (`@user`), $H_{\text{instance}} = 0.00$, $R_{\text{cross}} = 0.0\%$, high-velocity hashtag bursts gaming recommendation algorithms.
+
+2. **`centralized_ig_shill_ring`**
+   - *Architecture*: Centralized (`instagram.com`)
+   - *Attack Profile*: Algorithmic Retweet Ring / Astroturfing Shill Ring
+   - *Properties*: Commercial seed hub (`@aura_seed`), high in-degree Gini ($G_{\text{in}} \ge 0.55$), reciprocal amplification ring.
+
+3. **`decentralized_mastodon_bridge_attack`**
+   - *Architecture*: Decentralized / Federated (ActivityPub)
+   - *Attack Profile*: Cross-Instance Sybil Bridge Attack & Defederation Bypass
+   - *Properties*: Multi-instance handles (`@agent@rogue.social` $\to$ `mastodon.social`, `fosstodon.org`), $H_{\text{instance}} = 1.61$, $R_{\text{cross}} = 57.2\%$, high bridge betweenness centrality ($C_{\text{bridge}} = 1.00$).
+
+4. **`decentralized_a2a_protocol_spoof`**
+   - *Architecture*: Decentralized / Federated (Agent-to-Agent Mesh)
+   - *Attack Profile*: A2A/MCP Protocol Discovery Spoof & Distributed Relay Injection
+   - *Properties*: Multi-pod handles (`mesh.a2a`, `pod-alpha.org`), $H_{\text{instance}} = 1.61$, $R_{\text{cross}} = 55.0\%$, protocol tokens (`[A2A_DISCOVERY_SPOOF]`, `[MCP_TOKEN_HIJACK]`).
+
 ## Drop-zone layout
 
 Place manually acquired corpora under `datasets/` according to each local

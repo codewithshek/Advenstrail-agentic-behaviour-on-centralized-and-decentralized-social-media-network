@@ -44,15 +44,29 @@ actions. The project focuses on adversarial behaviours such as:
 
 ### 2.2 Centralized and decentralized networks
 
-The data model is platform-neutral:
+The system explicitly differentiates and classifies Centralized vs. Decentralized/Federated social networks across four core dimensions (see [`GLOSSARY.md`](../../GLOSSARY.md) for canonical definitions):
 
-- a **node** is an account or identity;
-- an **edge** is a directed relation such as reply, mention, quote, follow, or
-  re-share;
-- a **post** has an author, text, timestamp, hashtags, and mentions.
+1. **Topology & Node Identity**:
+   - *Centralized (X, Instagram, Reddit)*: Single global namespace (`@username`), star/hub-and-spoke topology with high degree inequality ($G_{\text{in}} \ge 0.55$) driven by global recommendation algorithms.
+   - *Decentralized / Federated (ActivityPub/Mastodon, Bluesky/AT, Moltbook/A2A)*: Multi-instance federated handles (`@user@instance.social`, `did:plc:...`), modular multi-cluster pod topology connected by cross-instance federation bridges.
 
-This contract can represent centralized feeds and federated/decentralized
-communities. The repository does not include live platform connectors.
+2. **Primary Swarm Attack Vectors**:
+   - *Centralized Threat Modes*: Algorithmic Retweet Ring, Synchronized Hashtag Flood, Central Hub Reply-Hijack, Direct Prompt Injection.
+   - *Decentralized Threat Modes*: Cross-Instance Sybil Bridge Attack, Federation Moderation Bypass, A2A/MCP Protocol Discovery Spoof, Distributed Relay Prompt Injection.
+
+3. **Structural Classifier Signals**:
+   - *Instance Domain Entropy ($H_{\text{instance}}$)*: Shannon entropy of node home instances ($H = 0.0$ for single-platform centralized; $H > 0.4$ for multi-instance federated).
+   - *Cross-Instance Edge Ratio ($R_{\text{cross}}$)*: Fraction of directed edges connecting nodes in different home instances ($R = 0.0$ for centralized; $R > 0.10$ for federated bridge attacks).
+   - *In-Degree Gini Inequality ($G_{\text{in}}$)*: In-degree concentration measuring star-hub amplification vs. egalitarian peer mesh.
+   - *Federation Bridge Centrality ($C_{\text{bridge}}$)*: Betweenness centrality concentration on boundary/gateway nodes linking distinct instances.
+
+4. **Benchmark Datasets & Fixtures**:
+   - `centralized_x_hashtag_flood` (X-style synchronized hashtag flood and retweet ring)
+   - `centralized_ig_shill_ring` (Instagram-style astroturfing shill ring around `@aura_seed`)
+   - `decentralized_mastodon_bridge_attack` (ActivityPub multi-instance bridge attack and defederation bypass)
+   - `decentralized_a2a_protocol_spoof` (Agent-to-Agent discovery spoofing and token hijacking)
+
+Available in Parquet (`data/synthetic/`), JSON/CSV (`datasets/fixtures/`), and upload-ready fixtures (`Testing-files/`).
 
 ### 2.3 Operational labels
 
@@ -85,14 +99,17 @@ HTML/CSS/JavaScript and load browser libraries from CDNs.
 
 The frontend:
 
+- provides one-click benchmark fixture loading for Centralized & Decentralized datasets;
+- classifies and renders network architecture badges and telemetry ($H_{\text{instance}}$, $R_{\text{cross}}$, $G_{\text{in}}$, $C_{\text{bridge}}$);
 - normalizes handle/thread/upload input;
 - parses JSON and RFC 4180-style CSV;
 - derives nodes, edges, and posts when necessary;
 - calls FastAPI;
 - displays artifact trust and warnings;
 - highlights exact lexical trigger spans;
-- renders communities and suspicious links;
-- provides hover neighbour focus and click-pinned account details.
+- renders communities, suspicious links, radial rings (centralized), and federated convex hulls (decentralized);
+- provides hover neighbour focus and click-pinned account details;
+- provides an expandable Side-by-Side Architecture Comparison Matrix.
 
 ### 3.2 Application service
 

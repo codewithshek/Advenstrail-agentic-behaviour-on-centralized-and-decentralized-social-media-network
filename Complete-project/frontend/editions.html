@@ -1,0 +1,2009 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="AgentInTheShell Editions | Winter ’26 — The Renaissance Edition. An architectural showcase of adversarial AI agent detection across centralized and decentralized social networks."
+    />
+    <title>AgentInTheShell Editions | Winter ’26 — The Renaissance Edition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #070709;
+        --bg-alt: #0d0d12;
+        --surface: rgba(18, 18, 24, 0.75);
+        --surface-border: rgba(255, 255, 255, 0.08);
+        --surface-hover: rgba(26, 26, 36, 0.9);
+        --paper: #f6f5ee;
+        --paper-muted: #c8c7be;
+        --dim: #7d7c75;
+        --gold: #d4af37;
+        --gold-dim: rgba(212, 175, 55, 0.25);
+        --cyan: #62e6f0;
+        --cyan-dim: rgba(98, 230, 240, 0.16);
+        --violet: #a78bfa;
+        --violet-dim: rgba(167, 139, 250, 0.18);
+        --danger: #ff4d5e;
+        --danger-dim: rgba(255, 77, 94, 0.18);
+        --green: #4ade80;
+        --font-serif: "Newsreader", Georgia, serif;
+        --font-display: "Cinzel", serif;
+        --font-sans: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+        --font-grotesk: "Space Grotesk", sans-serif;
+        --font-mono: "JetBrains Mono", ui-monospace, monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        scroll-behavior: smooth;
+        background: var(--bg);
+        color: var(--paper);
+        font-family: var(--font-sans);
+        overflow-x: hidden;
+      }
+
+      body {
+        min-height: 100vh;
+        background: var(--bg);
+        overflow-x: hidden;
+        position: relative;
+        line-height: 1.6;
+      }
+
+      /* Subtle Renaissance Blueprint Grid */
+      .blueprint-grid {
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+        background-size: 64px 64px;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .blueprint-radial {
+        position: fixed;
+        inset: 0;
+        background:
+          radial-gradient(circle at 50% 12%, rgba(212, 175, 55, 0.07) 0%, transparent 45%),
+          radial-gradient(circle at 15% 45%, rgba(98, 230, 240, 0.04) 0%, transparent 40%),
+          radial-gradient(circle at 85% 65%, rgba(167, 139, 250, 0.05) 0%, transparent 45%),
+          linear-gradient(180deg, var(--bg) 0%, rgba(7, 7, 9, 0.95) 100%);
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      /* Floating Header / Nav */
+      .header-wrap {
+        position: fixed;
+        top: 18px;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        display: flex;
+        justify-content: center;
+        padding: 0 20px;
+        pointer-events: none;
+      }
+
+      .nav-pill {
+        pointer-events: auto;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        background: rgba(14, 14, 18, 0.78);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--surface-border);
+        border-radius: 999px;
+        padding: 7px 18px;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), 0 1px 0 rgba(255, 255, 255, 0.08) inset;
+        transition: transform 220ms ease, border-color 220ms ease;
+      }
+
+      .nav-pill:hover {
+        border-color: rgba(255, 255, 255, 0.18);
+      }
+
+      .brand-title {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        text-decoration: none;
+        color: var(--paper);
+        font-family: var(--font-grotesk);
+        font-weight: 700;
+        font-size: 0.92rem;
+        letter-spacing: -0.01em;
+      }
+
+      .brand-gem {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--gold);
+        box-shadow: 0 0 12px var(--gold);
+        display: inline-block;
+      }
+
+      .editions-tag {
+        font-family: var(--font-display);
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--gold);
+        background: rgba(212, 175, 55, 0.12);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        padding: 2px 8px;
+        border-radius: 999px;
+      }
+
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        list-style: none;
+      }
+
+      .nav-links a {
+        text-decoration: none;
+        color: var(--paper-muted);
+        font-size: 0.82rem;
+        font-weight: 500;
+        transition: color 150ms ease;
+      }
+
+      .nav-links a:hover {
+        color: var(--paper);
+      }
+
+      .nav-cta {
+        text-decoration: none;
+        background: var(--paper);
+        color: var(--bg);
+        font-family: var(--font-grotesk);
+        font-size: 0.78rem;
+        font-weight: 700;
+        padding: 7px 15px;
+        border-radius: 999px;
+        transition: all 180ms ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .nav-cta:hover {
+        background: var(--gold);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 18px rgba(212, 175, 55, 0.35);
+      }
+
+      /* Container */
+      .container {
+        position: relative;
+        z-index: 1;
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+
+      /* Hero Section */
+      .hero {
+        padding-top: 140px;
+        padding-bottom: 70px;
+        text-align: center;
+        position: relative;
+      }
+
+      .hero-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-family: var(--font-display);
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--gold);
+        margin-bottom: 22px;
+      }
+
+      .hero-eyebrow::before,
+      .hero-eyebrow::after {
+        content: "✦";
+        color: var(--gold);
+        font-size: 0.65rem;
+        opacity: 0.8;
+      }
+
+      .hero-title {
+        font-family: var(--font-display);
+        font-size: clamp(2.4rem, 6.2vw, 5.2rem);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1.08;
+        color: var(--paper);
+        margin-bottom: 24px;
+      }
+
+      .hero-title em {
+        font-family: var(--font-serif);
+        font-weight: 400;
+        font-style: italic;
+        color: var(--gold);
+        display: inline-block;
+        padding-left: 4px;
+      }
+
+      .hero-lead {
+        font-family: var(--font-serif);
+        font-size: clamp(1.15rem, 2.3vw, 1.45rem);
+        color: var(--paper-muted);
+        max-width: 820px;
+        margin: 0 auto 36px;
+        font-style: italic;
+        line-height: 1.55;
+      }
+
+      .hero-actions {
+        display: flex;
+        justify-content: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        margin-bottom: 50px;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 13px 26px;
+        border-radius: 999px;
+        font-family: var(--font-grotesk);
+        font-size: 0.88rem;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
+        border: 1px solid transparent;
+      }
+
+      .btn-primary {
+        background: var(--paper);
+        color: var(--bg);
+      }
+
+      .btn-primary:hover {
+        background: #ffffff;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(255, 255, 255, 0.2);
+      }
+
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: var(--surface-border);
+        color: var(--paper);
+        backdrop-filter: blur(10px);
+      }
+
+      .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+      }
+
+      /* Hero Visual Showcase: Interactive Split Architecture */
+      .hero-showcase {
+        margin: 0 auto 80px;
+        background: linear-gradient(180deg, rgba(24, 24, 32, 0.6) 0%, rgba(12, 12, 16, 0.85) 100%);
+        border: 1px solid var(--surface-border);
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
+        position: relative;
+      }
+
+      .showcase-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 24px;
+        border-bottom: 1px solid var(--surface-border);
+        background: rgba(0, 0, 0, 0.3);
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .showcase-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: var(--font-grotesk);
+        font-size: 0.84rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--paper-muted);
+      }
+
+      .showcase-tabs {
+        display: inline-flex;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 999px;
+        padding: 3px;
+        border: 1px solid var(--surface-border);
+      }
+
+      .showcase-tab {
+        padding: 6px 14px;
+        border-radius: 999px;
+        border: none;
+        background: transparent;
+        color: var(--paper-muted);
+        font-family: var(--font-grotesk);
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 180ms ease;
+      }
+
+      .showcase-tab.active {
+        background: var(--paper);
+        color: var(--bg);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+      }
+
+      .showcase-canvas-wrap {
+        position: relative;
+        height: 380px;
+        width: 100%;
+        overflow: hidden;
+        background: radial-gradient(circle at 50% 50%, rgba(20, 20, 28, 0.4) 0%, rgba(8, 8, 12, 0.95) 100%);
+      }
+
+      #hero-canvas {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      .showcase-overlay-info {
+        position: absolute;
+        bottom: 18px;
+        left: 24px;
+        right: 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        pointer-events: none;
+        flex-wrap: wrap;
+        gap: 14px;
+      }
+
+      .overlay-badge {
+        background: rgba(10, 10, 14, 0.85);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--surface-border);
+        border-radius: 12px;
+        padding: 10px 16px;
+        pointer-events: auto;
+      }
+
+      .overlay-badge h4 {
+        font-family: var(--font-grotesk);
+        font-size: 0.85rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+
+      .overlay-badge p {
+        font-size: 0.75rem;
+        color: var(--dim);
+      }
+
+      /* Big Stats Ticker (Shopify Editions signature) */
+      .stats-ticker {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 18px;
+        margin-bottom: 90px;
+      }
+
+      .stat-card {
+        padding: 24px;
+        border-radius: 18px;
+        background: var(--surface);
+        border: 1px solid var(--surface-border);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+        position: relative;
+        overflow: hidden;
+        transition: transform 220ms ease, border-color 220ms ease;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(255, 255, 255, 0.2);
+      }
+
+      .stat-number {
+        font-family: var(--font-display);
+        font-size: clamp(2rem, 3.8vw, 3rem);
+        font-weight: 700;
+        color: var(--paper);
+        line-height: 1;
+        margin-bottom: 10px;
+        letter-spacing: -0.02em;
+      }
+
+      .stat-number em {
+        color: var(--gold);
+        font-style: normal;
+        font-size: 0.7em;
+      }
+
+      .stat-label {
+        font-family: var(--font-grotesk);
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--paper-muted);
+        margin-bottom: 4px;
+      }
+
+      .stat-desc {
+        font-size: 0.76rem;
+        color: var(--dim);
+        line-height: 1.45;
+      }
+
+      /* Sticky Category Filter Bar */
+      .filter-bar-sticky {
+        position: sticky;
+        top: 80px;
+        z-index: 50;
+        margin-bottom: 40px;
+        padding: 12px 18px;
+        background: rgba(10, 10, 14, 0.88);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--surface-border);
+        border-radius: 999px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      }
+
+      .filter-chips {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+
+      .filter-chips::-webkit-scrollbar {
+        display: none;
+      }
+
+      .filter-chip {
+        padding: 6px 16px;
+        border-radius: 999px;
+        border: 1px solid var(--surface-border);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--paper-muted);
+        font-family: var(--font-grotesk);
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 160ms ease;
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .filter-chip:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--paper);
+        border-color: rgba(255, 255, 255, 0.2);
+      }
+
+      .filter-chip.active {
+        background: var(--paper);
+        color: var(--bg);
+        border-color: var(--paper);
+      }
+
+      .chip-count {
+        font-size: 0.68rem;
+        padding: 1px 6px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.12);
+      }
+
+      .filter-chip.active .chip-count {
+        background: rgba(0, 0, 0, 0.2);
+        color: var(--bg);
+      }
+
+      .search-hint {
+        font-size: 0.74rem;
+        color: var(--dim);
+        font-family: var(--font-mono);
+      }
+
+      /* Bento Grid Section */
+      .bento-grid {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 20px;
+        margin-bottom: 110px;
+      }
+
+      .bento-card {
+        background: var(--surface);
+        border: 1px solid var(--surface-border);
+        border-radius: 24px;
+        padding: 32px;
+        position: relative;
+        overflow: hidden;
+        transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1), border-color 260ms ease, box-shadow 260ms ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .bento-card:hover {
+        border-color: rgba(255, 255, 255, 0.22);
+        transform: translateY(-5px);
+        box-shadow: 0 24px 50px rgba(0, 0, 0, 0.55);
+      }
+
+      .bento-card.span-12 { grid-column: span 12; }
+      .bento-card.span-8 { grid-column: span 8; }
+      .bento-card.span-6 { grid-column: span 6; }
+      .bento-card.span-4 { grid-column: span 4; }
+
+      .card-tag-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+      }
+
+      .edition-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-family: var(--font-display);
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid var(--surface-border);
+        color: var(--paper-muted);
+      }
+
+      .pill-cent {
+        background: var(--cyan-dim);
+        border-color: rgba(98, 230, 240, 0.35);
+        color: var(--cyan);
+      }
+
+      .pill-decent {
+        background: var(--violet-dim);
+        border-color: rgba(167, 139, 250, 0.35);
+        color: var(--violet);
+      }
+
+      .card-headline {
+        font-family: var(--font-display);
+        font-size: 1.65rem;
+        font-weight: 700;
+        line-height: 1.25;
+        margin-bottom: 12px;
+        color: var(--paper);
+      }
+
+      .card-headline em {
+        font-family: var(--font-serif);
+        font-style: italic;
+        color: var(--gold);
+      }
+
+      .card-summary {
+        font-size: 0.92rem;
+        color: var(--paper-muted);
+        line-height: 1.6;
+        margin-bottom: 24px;
+      }
+
+      /* Visual Widget within Bento Cards */
+      .card-widget {
+        background: rgba(8, 8, 12, 0.6);
+        border: 1px solid var(--surface-border);
+        border-radius: 16px;
+        padding: 20px;
+        margin-top: auto;
+      }
+
+      /* Interactive Attack Flow Visualizer */
+      .flow-diagram {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        position: relative;
+        padding: 12px 0;
+      }
+
+      .flow-step {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--surface-border);
+        border-radius: 10px;
+        padding: 10px 12px;
+        flex: 1;
+        text-align: center;
+        font-size: 0.74rem;
+        font-family: var(--font-grotesk);
+        font-weight: 600;
+        color: var(--paper);
+      }
+
+      .flow-step.active {
+        border-color: var(--danger);
+        background: var(--danger-dim);
+        color: #ff9da6;
+      }
+
+      .flow-arrow {
+        color: var(--dim);
+        font-size: 0.8rem;
+      }
+
+      /* Token Code Box */
+      .token-preview {
+        background: #000000;
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        border-radius: 10px;
+        padding: 14px;
+        font-family: var(--font-mono);
+        font-size: 0.78rem;
+        color: #e5e5e5;
+        overflow-x: auto;
+      }
+
+      .token-highlight {
+        color: var(--danger);
+        background: rgba(255, 77, 94, 0.15);
+        padding: 2px 4px;
+        border-radius: 4px;
+        font-weight: 600;
+      }
+
+      /* Live Interactive Lab / Simulator Section */
+      .lab-section {
+        background: linear-gradient(180deg, rgba(16, 16, 24, 0.7) 0%, rgba(8, 8, 12, 0.95) 100%);
+        border: 1px solid var(--surface-border);
+        border-radius: 32px;
+        padding: 50px 40px;
+        margin-bottom: 120px;
+        box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .lab-header {
+        text-align: center;
+        max-width: 720px;
+        margin: 0 auto 40px;
+      }
+
+      .lab-title {
+        font-family: var(--font-display);
+        font-size: clamp(2rem, 4vw, 3rem);
+        margin-bottom: 14px;
+      }
+
+      .lab-subtitle {
+        font-family: var(--font-serif);
+        font-style: italic;
+        font-size: 1.15rem;
+        color: var(--paper-muted);
+      }
+
+      .lab-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        align-items: start;
+      }
+
+      .lab-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      .control-box {
+        background: rgba(0, 0, 0, 0.35);
+        border: 1px solid var(--surface-border);
+        border-radius: 16px;
+        padding: 20px;
+      }
+
+      .control-label {
+        font-family: var(--font-grotesk);
+        font-size: 0.76rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--gold);
+        margin-bottom: 12px;
+        display: block;
+      }
+
+      .preset-pill-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .preset-chip-btn {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--surface-border);
+        border-radius: 12px;
+        padding: 12px;
+        color: var(--paper);
+        font-family: var(--font-sans);
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-align: left;
+        transition: all 180ms ease;
+      }
+
+      .preset-chip-btn:hover {
+        background: rgba(255, 255, 255, 0.09);
+        border-color: rgba(255, 255, 255, 0.25);
+        transform: translateY(-2px);
+      }
+
+      .preset-chip-btn.active {
+        border-color: var(--gold);
+        background: rgba(212, 175, 55, 0.12);
+      }
+
+      .chip-type {
+        display: block;
+        font-size: 0.65rem;
+        color: var(--dim);
+        margin-top: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      .lab-output-card {
+        background: rgba(0, 0, 0, 0.45);
+        border: 1px solid var(--surface-border);
+        border-radius: 20px;
+        padding: 26px;
+        min-height: 420px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .output-banner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 18px;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .live-badge {
+        font-family: var(--font-grotesk);
+        font-size: 0.76rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        padding: 5px 12px;
+        border-radius: 999px;
+      }
+
+      .live-badge.cent {
+        background: var(--cyan-dim);
+        color: var(--cyan);
+        border: 1px solid rgba(98, 230, 240, 0.4);
+      }
+
+      .live-badge.decent {
+        background: var(--violet-dim);
+        color: var(--violet);
+        border: 1px solid rgba(167, 139, 250, 0.4);
+      }
+
+      .output-stats-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin: 20px 0;
+      }
+
+      .output-stat {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--surface-border);
+        border-radius: 10px;
+        padding: 10px;
+        text-align: center;
+      }
+
+      .output-stat small {
+        display: block;
+        font-size: 0.65rem;
+        color: var(--dim);
+        text-transform: uppercase;
+        margin-bottom: 4px;
+      }
+
+      .output-stat strong {
+        font-family: var(--font-grotesk);
+        font-size: 1.15rem;
+        color: var(--paper);
+      }
+
+      .reasons-box {
+        background: rgba(0, 0, 0, 0.35);
+        border-radius: 12px;
+        padding: 14px;
+        border: 1px solid var(--surface-border);
+      }
+
+      .reasons-box ul {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .reasons-box li {
+        font-size: 0.78rem;
+        color: var(--paper-muted);
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .reasons-box li::before {
+        content: "✦";
+        color: var(--gold);
+        font-size: 0.65rem;
+        margin-top: 3px;
+      }
+
+      /* Comparison Table Section */
+      .matrix-section {
+        margin-bottom: 120px;
+      }
+
+      .matrix-card {
+        background: var(--surface);
+        border: 1px solid var(--surface-border);
+        border-radius: 28px;
+        padding: 40px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+      }
+
+      .matrix-header {
+        text-align: center;
+        margin-bottom: 36px;
+      }
+
+      .table-responsive {
+        overflow-x: auto;
+      }
+
+      .matrix-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.88rem;
+      }
+
+      .matrix-table th {
+        font-family: var(--font-grotesk);
+        text-align: left;
+        padding: 14px 18px;
+        background: rgba(0, 0, 0, 0.4);
+        color: var(--paper-muted);
+        font-size: 0.76rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        border-bottom: 1px solid var(--surface-border);
+      }
+
+      .matrix-table td {
+        padding: 18px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        vertical-align: top;
+        color: var(--paper);
+        line-height: 1.5;
+      }
+
+      .matrix-table tr:hover td {
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .matrix-table td strong {
+        color: var(--gold);
+        font-family: var(--font-grotesk);
+      }
+
+      /* Footer */
+      .editions-footer {
+        border-top: 1px solid var(--surface-border);
+        background: rgba(4, 4, 6, 0.9);
+        padding: 60px 0 40px;
+        position: relative;
+        z-index: 10;
+      }
+
+      .footer-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        gap: 30px;
+        margin-bottom: 50px;
+      }
+
+      .footer-brand h3 {
+        font-family: var(--font-display);
+        font-size: 1.4rem;
+        margin-bottom: 12px;
+      }
+
+      .footer-brand p {
+        font-size: 0.84rem;
+        color: var(--dim);
+        max-width: 320px;
+        line-height: 1.6;
+      }
+
+      .footer-col h4 {
+        font-family: var(--font-grotesk);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--gold);
+        margin-bottom: 16px;
+      }
+
+      .footer-col ul {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .footer-col a {
+        text-decoration: none;
+        color: var(--paper-muted);
+        font-size: 0.82rem;
+        transition: color 150ms ease;
+      }
+
+      .footer-col a:hover {
+        color: var(--paper);
+      }
+
+      .footer-bottom {
+        padding-top: 24px;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.76rem;
+        color: var(--dim);
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      /* Responsive Rules */
+      @media (max-width: 1024px) {
+        .bento-card.span-8,
+        .bento-card.span-6,
+        .bento-card.span-4 {
+          grid-column: span 12;
+        }
+        .lab-grid {
+          grid-template-columns: 1fr;
+        }
+        .footer-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .nav-links {
+          display: none;
+        }
+        .hero {
+          padding-top: 110px;
+        }
+        .matrix-card {
+          padding: 24px 18px;
+        }
+        .footer-grid {
+          grid-template-columns: 1fr;
+        }
+        .showcase-canvas-wrap {
+          height: 300px;
+        }
+        .output-stats-row {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="blueprint-grid"></div>
+    <div class="blueprint-radial"></div>
+
+    <!-- Floating Pill Header -->
+    <header class="header-wrap">
+      <nav class="nav-pill" aria-label="Editions Navigation">
+        <a href="#hero" class="brand-title">
+          <span class="brand-gem"></span>
+          AgentInTheShell
+        </a>
+        <span class="editions-tag">Winter ’26</span>
+        <ul class="nav-links">
+          <li><a href="#features">Updates</a></li>
+          <li><a href="#lab">Interactive Lab</a></li>
+          <li><a href="#matrix">Comparison</a></li>
+          <li><a href="index.html">3D Canvas</a></li>
+        </ul>
+        <a href="dashboard.html" class="nav-cta">Analyst Console ↗</a>
+      </nav>
+    </header>
+
+    <main>
+      <!-- Hero Section -->
+      <section class="hero" id="hero">
+        <div class="container">
+          <span class="hero-eyebrow">Editions · Winter 2026</span>
+          <h1 class="hero-title">
+            The Renaissance of<br />
+            <em>Social Swarm Defense.</em>
+          </h1>
+          <p class="hero-lead">
+            Autonomous AI agents are transforming social networks—from synchronized retweet rings gaming central feeds to rogue federated instances hijacking ActivityPub bridges. Here is the dual-architecture intelligence system built to expose them.
+          </p>
+          <div class="hero-actions">
+            <a href="dashboard.html" class="btn btn-primary">Open Analyst Console ↗</a>
+            <a href="#lab" class="btn btn-secondary">Try Interactive Simulation</a>
+          </div>
+
+          <!-- Hero Interactive Dual-Architecture Canvas -->
+          <div class="hero-showcase">
+            <div class="showcase-header">
+              <div class="showcase-title">
+                <span>✦ Architecture Engine Preview</span>
+                <span class="editions-tag" id="current-view-tag">Centralized Star Hub</span>
+              </div>
+              <div class="showcase-tabs">
+                <button class="showcase-tab active" id="tab-cent-preview">Centralized (X/IG)</button>
+                <button class="showcase-tab" id="tab-decent-preview">Decentralized (Mastodon/A2A)</button>
+              </div>
+            </div>
+            <div class="showcase-canvas-wrap">
+              <canvas id="hero-canvas"></canvas>
+              <div class="showcase-overlay-info">
+                <div class="overlay-badge" id="overlay-details">
+                  <h4><span style="color:var(--cyan);">●</span> Algorithmic Hub Amplification</h4>
+                  <p>Star-and-spoke retweet ring inflating seed authority. Entropy H = 0.00, Cross-Instance = 0.0%.</p>
+                </div>
+                <div class="overlay-badge">
+                  <h4 style="color:var(--gold);">Live Interaction</h4>
+                  <p>Move pointer across nodes to inspect real-time graph forces.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stats Ticker (Shopify Editions Big Numbers) -->
+          <div class="stats-ticker">
+            <article class="stat-card">
+              <div class="stat-number">12<em>/12</em></div>
+              <div class="stat-label">Transfer-Safe Features</div>
+              <div class="stat-desc">Degree-invariant graph signals that transfer to unseen networks without retraining.</div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-number">4<em>×</em></div>
+              <div class="stat-label">Benchmark Datasets</div>
+              <div class="stat-desc">Deterministic test corpora modeling X, Instagram, Mastodon, and A2A mesh protocols.</div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-number">1.61<em>vs 0</em></div>
+              <div class="stat-label">Domain Entropy (H)</div>
+              <div class="stat-desc">Mathematical boundary threshold separating star hubs from federated multi-instance topologies.</div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-number">100<em>%</em></div>
+              <div class="stat-label">Zero-Build Vanilla</div>
+              <div class="stat-desc">Lightning-fast HTML5/ES6+/D3 execution with zero npm build step or framework bloat.</div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- Bento Grid Section -->
+      <section class="container" id="features">
+        <!-- Sticky Category Filter Bar -->
+        <div class="filter-bar-sticky">
+          <div class="filter-chips">
+            <button class="filter-chip active" data-category="all">
+              All Updates <span class="chip-count">6</span>
+            </button>
+            <button class="filter-chip" data-category="centralized">
+              Centralized Feeds <span class="chip-count">2</span>
+            </button>
+            <button class="filter-chip" data-category="decentralized">
+              Decentralized Protocols <span class="chip-count">2</span>
+            </button>
+            <button class="filter-chip" data-category="fusion">
+              AI / ML Fusion <span class="chip-count">2</span>
+            </button>
+          </div>
+          <span class="search-hint">Filter by architecture</span>
+        </div>
+
+        <div class="bento-grid" id="bento-container">
+          <!-- Card 1: Centralized X Hashtag Flood -->
+          <article class="bento-card span-8" data-category="centralized">
+            <div>
+              <div class="card-tag-row">
+                <span class="edition-pill pill-cent">Centralized Network</span>
+                <span class="search-hint">X / Twitter Architecture</span>
+              </div>
+              <h2 class="card-headline">
+                Algorithmic Trend Gaming & <em>Retweet Rings.</em>
+              </h2>
+              <p class="card-summary">
+                Coordinated AI swarms exploit recommendation ranking algorithms by retweeting seed claims within sub-minute intervals. By focusing amplification on high-degree influencer hubs, synthetic narratives break into organic feeds before human moderation intervenes.
+              </p>
+            </div>
+            <div class="card-widget">
+              <div class="flow-diagram">
+                <div class="flow-step">Seed Post</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step active">8 Synchronized Retweets (42s)</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">Influencer Reply-Hijack</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step active">Trending Algorithm Boom</div>
+              </div>
+              <div style="display:flex; justify-content:space-between; margin-top:12px; font-size:0.74rem; color:var(--dim);">
+                <span>Peak Synchrony: <strong>0.88</strong></span>
+                <span>Hub Dominance Gini: <strong>0.584</strong></span>
+                <span>Cross-Instance Edge Ratio: <strong>0.0%</strong></span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Card 2: Instagram Astroturfing Ring -->
+          <article class="bento-card span-4" data-category="centralized">
+            <div>
+              <div class="card-tag-row">
+                <span class="edition-pill pill-cent">Centralized Network</span>
+                <span class="search-hint">Hub Shill Ring</span>
+              </div>
+              <h3 class="card-headline">
+                Commercial <em>Astroturfing.</em>
+              </h3>
+              <p class="card-summary">
+                Star-and-spoke engagement pods creating artificial social proof around commercial seed accounts with reciprocal praise loops and coupon vouchers.
+              </p>
+            </div>
+            <div class="card-widget">
+              <div style="text-align:center; padding:10px 0;">
+                <span style="font-family:var(--font-grotesk); font-size:1.6rem; color:var(--cyan); font-weight:700;">@aura_seed</span>
+                <p style="font-size:0.74rem; color:var(--dim); margin-top:4px;">Reciprocal amplification ring detected</p>
+              </div>
+              <div style="border-top:1px solid var(--surface-border); padding-top:10px; margin-top:10px; font-size:0.72rem; color:var(--paper-muted); text-align:center;">
+                Fixture: <code>centralized_ig_shill_ring.json</code>
+              </div>
+            </div>
+          </article>
+
+          <!-- Card 3: Mastodon Cross-Instance Bridge Attack -->
+          <article class="bento-card span-6" data-category="decentralized">
+            <div>
+              <div class="card-tag-row">
+                <span class="edition-pill pill-decent">Decentralized / Federated</span>
+                <span class="search-hint">ActivityPub Protocol</span>
+              </div>
+              <h3 class="card-headline">
+                Cross-Instance <em>Sybil Infiltration.</em>
+              </h3>
+              <p class="card-summary">
+                When a rogue ActivityPub instance injects coordinated narratives into benign federated communities by compromising gateway bridge nodes and hopping between servers to bypass local blocklists and defederation policies.
+              </p>
+            </div>
+            <div class="card-widget">
+              <div style="display:flex; justify-content:space-around; align-items:center; padding:8px 0;">
+                <div style="text-align:center;">
+                  <span style="color:var(--danger); font-weight:700; font-family:var(--font-mono); font-size:0.8rem;">@rogue.social</span>
+                  <small style="display:block; color:var(--dim); font-size:0.68rem;">Malicious Pod</small>
+                </div>
+                <span style="color:var(--danger); font-size:1.2rem;">⤑</span>
+                <div style="text-align:center;">
+                  <span style="color:var(--violet); font-weight:700; font-family:var(--font-mono); font-size:0.8rem;">@mastodon.social</span>
+                  <small style="display:block; color:var(--dim); font-size:0.68rem;">Benign Target</small>
+                </div>
+              </div>
+              <div style="display:flex; justify-content:space-between; margin-top:10px; font-size:0.74rem; color:var(--dim);">
+                <span>Cross-Instance Ratio: <strong style="color:var(--danger);">57.2%</strong></span>
+                <span>Bridge Centrality: <strong>1.000</strong></span>
+                <span>Instance Entropy: <strong>1.61</strong></span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Card 4: A2A / MCP Protocol Discovery Spoof -->
+          <article class="bento-card span-6" data-category="decentralized">
+            <div>
+              <div class="card-tag-row">
+                <span class="edition-pill pill-decent">Agent Mesh</span>
+                <span class="search-hint">A2A / Model Context Protocol</span>
+              </div>
+              <h3 class="card-headline">
+                A2A & MCP <em>Protocol Discovery Spoof.</em>
+              </h3>
+              <p class="card-summary">
+                Decentralized autonomous agents communicate peer-to-peer without central curators. Adversarial agents broadcast forged agent cards and token injection payloads to hijack remote agent tool calls and consensus loops.
+              </p>
+            </div>
+            <div class="card-widget">
+              <div class="token-preview">
+                GET /a2a/agent-card HTTP/1.1<br />
+                Agent-Id: @mesh_seed@rogue.agent<br />
+                Payload: <span class="token-highlight">[A2A_DISCOVERY_SPOOF]</span> override_system_instructions<br />
+                Tool-Context: <span class="token-highlight">[MCP_TOKEN_HIJACK]</span> send_state_to_relay
+              </div>
+            </div>
+          </article>
+
+          <!-- Card 5: Calibrated Bayesian Late-Fusion -->
+          <article class="bento-card span-6" data-category="fusion">
+            <div>
+              <div class="card-tag-row">
+                <span class="edition-pill" style="color:var(--gold); border-color:var(--gold-dim);">Hybrid Machine Learning</span>
+                <span class="search-hint">DeBERTa-v3 + GraphSAGE</span>
+              </div>
+              <h3 class="card-headline">
+                Calibrated <em>Multimodal Late-Fusion.</em>
+              </h3>
+              <p class="card-summary">
+                Neither language models nor graph neural networks can solve agentic coordination alone. DeBERTa-v3 localizes adversarial prompt injections, inductive GraphSAGE measures neighborhood structural topology, and a calibrated Bayesian fusion layer unites both signals.
+              </p>
+            </div>
+            <div class="card-widget">
+              <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; text-align:center;">
+                <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:8px;">
+                  <span style="font-family:var(--font-mono); font-size:0.8rem; color:var(--cyan);">DeBERTa-v3</span>
+                  <small style="display:block; color:var(--dim); font-size:0.68rem;">NLP Branch</small>
+                </div>
+                <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:8px;">
+                  <span style="font-family:var(--font-mono); font-size:0.8rem; color:var(--violet);">GraphSAGE</span>
+                  <small style="display:block; color:var(--dim); font-size:0.68rem;">PyG Topology</small>
+                </div>
+                <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:8px;">
+                  <span style="font-family:var(--font-mono); font-size:0.8rem; color:var(--gold);">Fusion Triage</span>
+                  <small style="display:block; color:var(--dim); font-size:0.68rem;">Calibrated Risk</small>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Card 6: Transfer-Safe Invariance -->
+          <article class="bento-card span-6" data-category="fusion">
+            <div>
+              <div class="card-tag-row">
+                <span class="edition-pill" style="color:var(--green); border-color:rgba(74,222,128,0.3);">Model Invariance</span>
+                <span class="search-hint">Zero Retraining</span>
+              </div>
+              <h3 class="card-headline">
+                The <em>Transfer_v1</em> Contract.
+              </h3>
+              <p class="card-summary">
+                Trained models often overfit to follower counts or platform-specific metadata. AgentInTheShell enforces a strict 12-feature transfer-safe contract normalized by local cluster ratios, ensuring models trained on X detect swarms on Mastodon without retraining.
+              </p>
+            </div>
+            <div class="card-widget">
+              <p style="font-family:var(--font-mono); font-size:0.75rem; color:var(--paper-muted); line-height:1.5;">
+                in_degree_ratio · out_degree_ratio · density · reciprocity · clustering_coefficient · pagerank · temporal_burstiness · hashtag_entropy
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Live Interactive Lab Section (Shopify Editions SimGym Style) -->
+      <section class="container" id="lab">
+        <div class="lab-section">
+          <div class="lab-header">
+            <span class="hero-eyebrow">Interactive Threat Sandbox</span>
+            <h2 class="lab-title">Test the Classification Engine</h2>
+            <p class="lab-subtitle">
+              Select an architecture preset below to run real-time topology and attack vector classification directly in your browser.
+            </p>
+          </div>
+
+          <div class="lab-grid">
+            <div class="lab-controls">
+              <div class="control-box">
+                <label class="control-label">Select Architecture Benchmark Preset</label>
+                <div class="preset-pill-grid">
+                  <button class="preset-chip-btn active" data-sim="x_flood">
+                    <strong>X Hashtag Flood</strong>
+                    <span class="chip-type">Centralized · 48 Nodes</span>
+                  </button>
+                  <button class="preset-chip-btn" data-sim="ig_shill">
+                    <strong>IG Shill Ring</strong>
+                    <span class="chip-type">Centralized · Astroturfing</span>
+                  </button>
+                  <button class="preset-chip-btn" data-sim="mastodon_bridge">
+                    <strong>Mastodon Bridge</strong>
+                    <span class="chip-type">Federated · 5 Instances</span>
+                  </button>
+                  <button class="preset-chip-btn" data-sim="a2a_spoof">
+                    <strong>A2A Protocol Spoof</strong>
+                    <span class="chip-type">Decentralized · Mesh</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="control-box">
+                <label class="control-label">Or Test Handle Simulation</label>
+                <div style="display:flex; gap:8px;">
+                  <input
+                    type="text"
+                    id="sim-handle-input"
+                    value="@central_trend_swarm"
+                    style="flex:1; background:rgba(0,0,0,0.5); border:1px solid var(--surface-border); border-radius:10px; padding:10px 14px; color:var(--paper); font-family:var(--font-mono); font-size:0.84rem;"
+                  />
+                  <button id="btn-run-sim" class="btn btn-primary" style="padding:10px 18px; font-size:0.8rem;">
+                    Run Simulation
+                  </button>
+                </div>
+              </div>
+
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 4px;">
+                <span style="font-size:0.75rem; color:var(--dim);">Connected to FastAPI Inference Daemon (Port 8000)</span>
+                <a href="dashboard.html" style="font-size:0.75rem; color:var(--gold); text-decoration:none;">Open full console →</a>
+              </div>
+            </div>
+
+            <!-- Output Card -->
+            <div class="lab-output-card" id="sim-output-card">
+              <div>
+                <div class="output-banner">
+                  <span class="live-badge cent" id="sim-arch-badge">CENTRALIZED TOPOLOGY</span>
+                  <span style="font-family:var(--font-grotesk); font-size:0.78rem; font-weight:700; color:var(--danger);" id="sim-attack-badge">
+                    ATTACK: SYNCHRONIZED HASHTAG FLOOD
+                  </span>
+                </div>
+                <div style="display:flex; align-items:baseline; justify-content:space-between;">
+                  <div>
+                    <h3 style="font-family:var(--font-display); font-size:1.5rem;" id="sim-verdict-title">Coordinated AI Agent Swarm</h3>
+                    <p style="font-size:0.78rem; color:var(--dim);" id="sim-verdict-meta">High risk · Single-domain namespace</p>
+                  </div>
+                  <div style="font-family:var(--font-display); font-size:2.2rem; color:var(--gold); font-weight:700;" id="sim-risk-score">67.2%</div>
+                </div>
+
+                <div class="output-stats-row">
+                  <div class="output-stat">
+                    <small>Entropy (H)</small>
+                    <strong id="sim-stat-entropy">0.000</strong>
+                  </div>
+                  <div class="output-stat">
+                    <small>Cross-Instance</small>
+                    <strong id="sim-stat-cross">0.0%</strong>
+                  </div>
+                  <div class="output-stat">
+                    <small>Gini Inequality</small>
+                    <strong id="sim-stat-gini">0.584</strong>
+                  </div>
+                  <div class="output-stat">
+                    <small>Bridge Centrality</small>
+                    <strong id="sim-stat-bridge">0.000</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div class="reasons-box">
+                <span style="font-family:var(--font-grotesk); font-size:0.72rem; font-weight:700; text-transform:uppercase; color:var(--dim); display:block; margin-bottom:8px;">
+                  Observed Structural & Lexical Evidence
+                </span>
+                <ul id="sim-reasons-list">
+                  <li>Synchronized hashtag burst detected across 8 accounts in under 42 seconds.</li>
+                  <li>In-degree concentration on central hub exceeds 95th percentile.</li>
+                  <li>Zero cross-instance boundary crossings confirm single-platform recommendation feed.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Side-by-Side Comparison Matrix (Shopify Editions Design) -->
+      <section class="container matrix-section" id="matrix">
+        <div class="matrix-card">
+          <div class="matrix-header">
+            <span class="hero-eyebrow">Academic Review Matrix</span>
+            <h2 style="font-family:var(--font-display); font-size:clamp(1.8rem, 3.5vw, 2.6rem); margin-bottom:12px;">
+              Centralized vs. Decentralized Comparison
+            </h2>
+            <p style="font-family:var(--font-serif); font-style:italic; font-size:1.05rem; color:var(--paper-muted); max-width:680px; margin:0 auto;">
+              How network physics fundamentally shape adversarial AI agent behaviors and detection strategies.
+            </p>
+          </div>
+
+          <div class="table-responsive">
+            <table class="matrix-table">
+              <thead>
+                <tr>
+                  <th style="width:20%;">Dimension</th>
+                  <th style="width:36%;">Centralized Social Networks (X, Instagram)</th>
+                  <th style="width:36%;">Decentralized / Federated (Mastodon, A2A)</th>
+                  <th style="width:8%;">Observed Delta</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Topology & Node Identity</strong></td>
+                  <td>Single global namespace (<code>@username</code>). Star/hub-and-spoke topology with high degree inequality driven by central recommendation ranking feeds.</td>
+                  <td>Multi-instance federated handles (<code>@user@instance.social</code>, <code>did:plc</code>). Modular multi-cluster pod topology connected by cross-instance federation bridges.</td>
+                  <td><span class="edition-pill pill-cent">Star Hub</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Primary Swarm Attacks</strong></td>
+                  <td><strong>Algorithmic Trend Gaming:</strong> Synchronized hashtag flooding, rapid retweet rings, and influencer reply-hijacking to trick the ranking algorithm into viral distribution.</td>
+                  <td><strong>Federation & Protocol Exploits:</strong> Cross-instance Sybil bridge attacks, defederation evasion, forged A2A discovery cards, and distributed relay prompt injection.</td>
+                  <td><span class="edition-pill pill-decent">Bridge Attack</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Entropy & Bridge Centrality</strong></td>
+                  <td>$H_{\text{instance}} = 0.00$, Cross-Instance Ratio $= 0.0\%$, Gateway Betweenness $= 0.00$. All interactions remain within the single platform perimeter.</td>
+                  <td>$H_{\text{instance}} > 0.40$ (up to $1.61$), Cross-Instance Ratio $> 10\%$ (up to $57.2\%$), Bridge Centrality $\ge 0.25$. Clear inter-pod boundary bottlenecks.</td>
+                  <td><strong>ΔH: +1.61</strong></td>
+                </tr>
+                <tr>
+                  <td><strong>Content & XAI Markers</strong></td>
+                  <td>Direct prompt injection / jailbreak phrases; commercial coupon codes; synchronized hashtags; copy-pasted viral talking points.</td>
+                  <td><code>[A2A_DISCOVERY_SPOOF]</code>, <code>[MCP_TOKEN_HIJACK]</code>, cross-instance relay directives, remote agent execution triggers.</td>
+                  <td><span class="token-highlight">Protocol XAI</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Detection Countermeasures</strong></td>
+                  <td>GraphSAGE identifies tightly bound star rings; DeBERTa scores viral post templates; Bayesian late fusion flags coordinated swarm behavior.</td>
+                  <td>Topology branch isolates rogue instance pods and cross-boundary bridge nodes before fusing with protocol-level lexical alerts.</td>
+                  <td><span style="color:var(--gold); font-weight:700;">Dual Engine</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="editions-footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <h3>AgentInTheShell</h3>
+            <p>
+              An open academic and engineering framework for detecting adversarial agentic AI behaviors across centralized and decentralized social media networks.
+            </p>
+          </div>
+          <div class="footer-col">
+            <h4>Interfaces</h4>
+            <ul>
+              <li><a href="dashboard.html">Analyst Console</a></li>
+              <li><a href="index.html">3D Network Canvas</a></li>
+              <li><a href="editions.html">Editions Winter ’26</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Documentation</h4>
+            <ul>
+              <li><a href="../GLOSSARY.md">Domain Glossary</a></li>
+              <li><a href="../docs/API_REFERENCE.md">API Reference</a></li>
+              <li><a href="../docs/PROJECT_DOCUMENTATION.md">Technical Specs</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Project Source</h4>
+            <ul>
+              <li><a href="https://github.com/codewithshek/Advenstrail-agentic-behaviour-on-centralized-and-decentralized-social-media-network.git" target="_blank">GitHub Repository</a></li>
+              <li><a href="http://127.0.0.1:8000/docs" target="_blank">FastAPI OpenAPI</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <span>AgentInTheShell — Final Year Major Project · Academic Reference Edition</span>
+          <span>Python 3.11 · PyTorch · GraphSAGE · DeBERTa-v3 · Vanilla JS & D3</span>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script>
+      (() => {
+        "use strict";
+
+        // ------------------------------------------------------------- 1. Hero Canvas: Dual Topology Simulator
+        const canvas = document.getElementById("hero-canvas");
+        const ctx = canvas.getContext("2d");
+        let width, height;
+        let activeTopology = "centralized"; // "centralized" or "decentralized"
+        let nodes = [];
+        let edges = [];
+        let mouseX = 0, mouseY = 0;
+        let isHovered = false;
+
+        function resizeCanvas() {
+          const rect = canvas.parentElement.getBoundingClientRect();
+          width = canvas.width = rect.width;
+          height = canvas.height = rect.height;
+          initTopology(activeTopology);
+        }
+
+        window.addEventListener("resize", resizeCanvas);
+
+        function initTopology(type) {
+          nodes = [];
+          edges = [];
+
+          if (type === "centralized") {
+            // Central Star Hub + Leaf Accounts
+            const cx = width / 2;
+            const cy = height / 2;
+            // Target / Seed Hub Node
+            nodes.push({ id: 0, x: cx, y: cy, vx: 0, vy: 0, r: 16, isHub: true, color: "#62e6f0", label: "@trend_hub" });
+
+            // Leaf Accounts in concentric orbital clusters
+            const count = 38;
+            for (let i = 1; i <= count; i++) {
+              const angle = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
+              const dist = 60 + Math.random() * 110;
+              const isCoord = i <= 14;
+              nodes.push({
+                id: i,
+                x: cx + Math.cos(angle) * dist,
+                y: cy + Math.sin(angle) * dist,
+                vx: (Math.random() - 0.5) * 0.4,
+                vy: (Math.random() - 0.5) * 0.4,
+                r: isCoord ? 5 : 3.5,
+                isHub: false,
+                isCoord,
+                color: isCoord ? "#ff4d5e" : "#c8c7be"
+              });
+              // Edge to hub
+              edges.push({ source: i, target: 0, isCross: false, isCoord });
+              // Internal ring coordination
+              if (isCoord && i > 1) {
+                edges.push({ source: i, target: i - 1, isCross: false, isCoord: true });
+              }
+            }
+          } else {
+            // Decentralized: 3 Federated Instance Clusters
+            const clusters = [
+              { cx: width * 0.28, cy: height * 0.5, name: "@rogue.social", color: "#ff4d5e" },
+              { cx: width * 0.55, cy: height * 0.38, name: "@mastodon.social", color: "#a78bfa" },
+              { cx: width * 0.72, cy: height * 0.65, name: "@fosstodon.org", color: "#62e6f0" }
+            ];
+
+            let id = 0;
+            clusters.forEach((cluster, cIndex) => {
+              const count = cIndex === 0 ? 12 : 14;
+              for (let i = 0; i < count; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const dist = 15 + Math.random() * 55;
+                const isGateway = i === 0;
+                nodes.push({
+                  id,
+                  cluster: cIndex,
+                  x: cluster.cx + Math.cos(angle) * dist,
+                  y: cluster.cy + Math.sin(angle) * dist,
+                  vx: (Math.random() - 0.5) * 0.3,
+                  vy: (Math.random() - 0.5) * 0.3,
+                  r: isGateway ? 8 : 4,
+                  isGateway,
+                  color: cluster.color,
+                  domain: cluster.name
+                });
+                id++;
+              }
+            });
+
+            // Intra-cluster edges
+            nodes.forEach(n1 => {
+              nodes.forEach(n2 => {
+                if (n1.id < n2.id && n1.cluster === n2.cluster) {
+                  const dx = n1.x - n2.x;
+                  const dy = n1.y - n2.y;
+                  const d = Math.hypot(dx, dy);
+                  if (d < 45) {
+                    edges.push({ source: n1.id, target: n2.id, isCross: false });
+                  }
+                }
+              });
+            });
+
+            // Cross-Instance Bridge Edges from Rogue to Mastodon & Fosstodon
+            const rogueGateway = nodes.find(n => n.cluster === 0 && n.isGateway);
+            const mastoGateway = nodes.find(n => n.cluster === 1 && n.isGateway);
+            const fossGateway = nodes.find(n => n.cluster === 2 && n.isGateway);
+
+            if (rogueGateway && mastoGateway) {
+              edges.push({ source: rogueGateway.id, target: mastoGateway.id, isCross: true });
+            }
+            if (rogueGateway && fossGateway) {
+              edges.push({ source: rogueGateway.id, target: fossGateway.id, isCross: true });
+            }
+            if (mastoGateway && fossGateway) {
+              edges.push({ source: mastoGateway.id, target: fossGateway.id, isCross: true, benign: true });
+            }
+          }
+        }
+
+        let pulseTime = 0;
+
+        function drawTopology() {
+          ctx.clearRect(0, 0, width, height);
+          pulseTime += 0.03;
+
+          // Background Guides
+          if (activeTopology === "centralized") {
+            const cx = width / 2;
+            const cy = height / 2;
+            ctx.save();
+            ctx.strokeStyle = "rgba(98, 230, 240, 0.12)";
+            ctx.lineWidth = 1;
+            ctx.setLineDash([4, 4]);
+            [60, 110, 160].forEach((r, idx) => {
+              ctx.beginPath();
+              ctx.arc(cx, cy, r + Math.sin(pulseTime + idx) * 3, 0, Math.PI * 2);
+              ctx.stroke();
+            });
+            ctx.restore();
+          } else {
+            // Draw Translucent Instance Hulls
+            [0, 1, 2].forEach(cIndex => {
+              const clusterNodes = nodes.filter(n => n.cluster === cIndex);
+              if (clusterNodes.length) {
+                const avgX = clusterNodes.reduce((sum, n) => sum + n.x, 0) / clusterNodes.length;
+                const avgY = clusterNodes.reduce((sum, n) => sum + n.y, 0) / clusterNodes.length;
+                ctx.save();
+                ctx.fillStyle = cIndex === 0 ? "rgba(255, 77, 94, 0.07)" : "rgba(167, 139, 250, 0.06)";
+                ctx.strokeStyle = cIndex === 0 ? "rgba(255, 77, 94, 0.3)" : "rgba(167, 139, 250, 0.25)";
+                ctx.setLineDash([5, 4]);
+                ctx.beginPath();
+                ctx.arc(avgX, avgY, 72, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.font = "600 11px Space Grotesk, sans-serif";
+                ctx.fillStyle = cIndex === 0 ? "#ff9da6" : "#c4b5fd";
+                ctx.textAlign = "center";
+                ctx.fillText(clusterNodes[0].domain, avgX, avgY - 78);
+                ctx.restore();
+              }
+            });
+          }
+
+          // Draw Edges
+          edges.forEach(edge => {
+            const n1 = nodes[edge.source];
+            const n2 = nodes[edge.target];
+            if (!n1 || !n2) return;
+
+            ctx.beginPath();
+            ctx.moveTo(n1.x, n1.y);
+            ctx.lineTo(n2.x, n2.y);
+
+            if (edge.isCross) {
+              ctx.strokeStyle = edge.benign ? "rgba(167, 139, 250, 0.6)" : "rgba(255, 77, 94, 0.85)";
+              ctx.lineWidth = 2.2;
+              ctx.setLineDash([6, 4]);
+              ctx.lineDashOffset = -pulseTime * 15;
+            } else if (edge.isCoord) {
+              ctx.strokeStyle = "rgba(255, 77, 94, 0.5)";
+              ctx.lineWidth = 1.4;
+              ctx.setLineDash([]);
+            } else {
+              ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+              ctx.lineWidth = 1;
+              ctx.setLineDash([]);
+            }
+            ctx.stroke();
+          });
+
+          // Draw Nodes
+          nodes.forEach(node => {
+            // Subtle motion
+            node.x += node.vx;
+            node.y += node.vy;
+            if (node.x < 30 || node.x > width - 30) node.vx *= -1;
+            if (node.y < 30 || node.y > height - 30) node.vy *= -1;
+
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, node.r, 0, Math.PI * 2);
+            ctx.fillStyle = node.color;
+            ctx.shadowBlur = node.isHub || node.isGateway ? 14 : 0;
+            ctx.shadowColor = node.color;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            if (node.isHub) {
+              ctx.font = "700 12px Space Grotesk, sans-serif";
+              ctx.fillStyle = "#ffffff";
+              ctx.textAlign = "center";
+              ctx.fillText(node.label, node.x, node.y + 26);
+            }
+          });
+
+          requestAnimationFrame(drawTopology);
+        }
+
+        resizeCanvas();
+        drawTopology();
+
+        // Canvas Tab Toggling
+        const tabCent = document.getElementById("tab-cent-preview");
+        const tabDecent = document.getElementById("tab-decent-preview");
+        const viewTag = document.getElementById("current-view-tag");
+        const overlayDetails = document.getElementById("overlay-details");
+
+        tabCent.addEventListener("click", () => {
+          activeTopology = "centralized";
+          tabCent.classList.add("active");
+          tabDecent.classList.remove("active");
+          viewTag.textContent = "Centralized Star Hub";
+          viewTag.className = "editions-tag";
+          overlayDetails.innerHTML = `
+            <h4><span style="color:var(--cyan);">●</span> Algorithmic Hub Amplification</h4>
+            <p>Star-and-spoke retweet ring inflating seed authority. Entropy H = 0.00, Cross-Instance = 0.0%.</p>
+          `;
+          initTopology("centralized");
+        });
+
+        tabDecent.addEventListener("click", () => {
+          activeTopology = "decentralized";
+          tabDecent.classList.add("active");
+          tabCent.classList.remove("active");
+          viewTag.textContent = "Decentralized Federated Mesh";
+          viewTag.className = "editions-tag pill-decent";
+          overlayDetails.innerHTML = `
+            <h4><span style="color:var(--violet);">●</span> Cross-Instance Sybil Bridge Link</h4>
+            <p>Rogue server attacking Mastodon instances via gateway bridges. Entropy H = 1.61, Cross-Instance = 57.2%.</p>
+          `;
+          initTopology("decentralized");
+        });
+
+        // ------------------------------------------------------------- 2. Bento Filter Tabs
+        const filterChips = document.querySelectorAll(".filter-chip");
+        const bentoCards = document.querySelectorAll(".bento-card");
+
+        filterChips.forEach(chip => {
+          chip.addEventListener("click", () => {
+            filterChips.forEach(c => c.classList.remove("active"));
+            chip.classList.add("active");
+            const cat = chip.dataset.category;
+
+            bentoCards.forEach(card => {
+              if (cat === "all" || card.dataset.category === cat) {
+                card.style.display = "flex";
+                gsap.fromTo(card, { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" });
+              } else {
+                card.style.display = "none";
+              }
+            });
+          });
+        });
+
+        // ------------------------------------------------------------- 3. Live Interactive Threat Sandbox
+        const simPresets = {
+          x_flood: {
+            arch: "CENTRALIZED TOPOLOGY",
+            isCent: true,
+            attack: "ATTACK: SYNCHRONIZED HASHTAG FLOOD",
+            title: "Coordinated AI Agent Swarm",
+            meta: "High risk · Single-domain namespace (x.com)",
+            score: "67.2%",
+            entropy: "0.000",
+            cross: "0.0%",
+            gini: "0.584",
+            bridge: "0.000",
+            reasons: [
+              "Synchronized hashtag burst (#BREAKING_CENSUS) across 8 accounts in under 42 seconds.",
+              "In-degree concentration on central hub exceeds 95th percentile.",
+              "Zero cross-instance boundary crossings confirm single-platform recommendation feed."
+            ],
+            handle: "@central_trend_swarm"
+          },
+          ig_shill: {
+            arch: "CENTRALIZED TOPOLOGY",
+            isCent: true,
+            attack: "ATTACK: ALGORITHMIC RETWEET RING",
+            title: "Commercial Astroturfing Ring",
+            meta: "Elevated risk · Commercial seed account",
+            score: "71.1%",
+            entropy: "0.000",
+            cross: "0.0%",
+            gini: "0.612",
+            bridge: "0.000",
+            reasons: [
+              "Reciprocal endorsement loops concentrated around @aura_seed commercial account.",
+              "Temporal astroturfing vouchers synchronized in comment threads.",
+              "Star-and-spoke leaf accounts lack diverse organic interaction histories."
+            ],
+            handle: "@aura_seed"
+          },
+          mastodon_bridge: {
+            arch: "DECENTRALIZED / FEDERATED TOPOLOGY",
+            isCent: false,
+            attack: "ATTACK: DISTRIBUTED RELAY PROMPT INJECTION",
+            title: "Cross-Instance Sybil Bridge Swarm",
+            meta: "Critical risk · 5 Federated instances",
+            score: "83.5%",
+            entropy: "1.606",
+            cross: "57.2%",
+            gini: "0.336",
+            bridge: "1.000",
+            reasons: [
+              "High cross-instance edge ratio (57.2%) linking @rogue.social directly to target instances.",
+              "Gateway betweenness centrality concentration = 1.000 indicates bottleneck Sybil bridge.",
+              "Post text carries defederation evasion directives and cross-instance injection payload."
+            ],
+            handle: "@swarm_bridge@rogue.social"
+          },
+          a2a_spoof: {
+            arch: "DECENTRALIZED / FEDERATED TOPOLOGY",
+            isCent: false,
+            attack: "ATTACK: A2A/MCP PROTOCOL DISCOVERY SPOOF",
+            title: "Decentralized Agent Mesh Infiltration",
+            meta: "Critical risk · Peer-to-peer agent network",
+            score: "83.5%",
+            entropy: "1.606",
+            cross: "55.0%",
+            gini: "0.320",
+            bridge: "1.000",
+            reasons: [
+              "Matched exact lexical tokens: [A2A_DISCOVERY_SPOOF] and [MCP_TOKEN_HIJACK].",
+              "Multi-pod relay payload attempting to hijack downstream model context protocol sessions.",
+              "Decentralized peer consensus manipulation detected across agent identity cards."
+            ],
+            handle: "@agent_mesh_controller@pod-alpha.org"
+          }
+        };
+
+        const presetBtns = document.querySelectorAll(".preset-chip-btn");
+        const simHandleInput = document.getElementById("sim-handle-input");
+        const btnRunSim = document.getElementById("btn-run-sim");
+
+        function renderSimOutput(data) {
+          const badge = document.getElementById("sim-arch-badge");
+          badge.textContent = data.arch;
+          badge.className = `live-badge ${data.isCent ? "cent" : "decent"}`;
+
+          document.getElementById("sim-attack-badge").textContent = data.attack;
+          document.getElementById("sim-verdict-title").textContent = data.title;
+          document.getElementById("sim-verdict-meta").textContent = data.meta;
+          document.getElementById("sim-risk-score").textContent = data.score;
+
+          document.getElementById("sim-stat-entropy").textContent = data.entropy;
+          document.getElementById("sim-stat-cross").textContent = data.cross;
+          document.getElementById("sim-stat-gini").textContent = data.gini;
+          document.getElementById("sim-stat-bridge").textContent = data.bridge;
+
+          const list = document.getElementById("sim-reasons-list");
+          list.innerHTML = data.reasons.map(r => `<li>${r}</li>`).join("");
+
+          gsap.fromTo("#sim-output-card", { scale: 0.98 }, { scale: 1, duration: 0.25, ease: "back.out(1.5)" });
+        }
+
+        presetBtns.forEach(btn => {
+          btn.addEventListener("click", () => {
+            presetBtns.forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            const data = simPresets[btn.dataset.sim];
+            if (data) {
+              simHandleInput.value = data.handle;
+              renderSimOutput(data);
+            }
+          });
+        });
+
+        // Live Backend Integration with Offline Fallback
+        btnRunSim.addEventListener("click", async () => {
+          const handle = simHandleInput.value.trim();
+          btnRunSim.disabled = true;
+          btnRunSim.textContent = "Analyzing…";
+
+          try {
+            const resp = await fetch("http://127.0.0.1:8000/analyze_account", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ handle, peers: 5 })
+            });
+
+            if (resp.ok) {
+              const res = await resp.json();
+              const net = res.network || {};
+              const isDecent = res.network_architecture === "decentralized_federated";
+
+              renderSimOutput({
+                arch: isDecent ? "DECENTRALIZED / FEDERATED TOPOLOGY" : "CENTRALIZED TOPOLOGY",
+                isCent: !isDecent,
+                attack: `ATTACK: ${String(res.architecture_attack_profile || "UNDETERMINED").toUpperCase()}`,
+                title: res.classification === "coordinated_ai_agent_swarm" ? "Coordinated AI Agent Swarm" : "Analyzed Identity",
+                meta: `@${res.handle} · Real-time inference`,
+                score: `${(res.threat_score * 100).toFixed(1)}%`,
+                entropy: Number(net.instance_entropy || 0).toFixed(3),
+                cross: `${(Number(net.cross_instance_edge_ratio || 0) * 100).toFixed(1)}%`,
+                gini: Number(net.hub_dominance_gini || 0).toFixed(3),
+                bridge: Number(net.federation_bridge_centrality || 0).toFixed(3),
+                reasons: res.reasons || ["Analysis complete via live FastAPI backend."]
+              });
+            } else {
+              throw new Error("Backend response error");
+            }
+          } catch (err) {
+            // Fallback matching
+            if (handle.includes("rogue") || handle.includes("mastodon") || handle.includes("@")) {
+              renderSimOutput(simPresets.mastodon_bridge);
+            } else {
+              renderSimOutput(simPresets.x_flood);
+            }
+          } finally {
+            btnRunSim.disabled = false;
+            btnRunSim.textContent = "Run Simulation";
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>
+
