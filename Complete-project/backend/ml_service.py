@@ -18,7 +18,12 @@ sys.path.insert(0, str(ROOT / "ml" / "src"))
 
 from aegis.config import load_config
 from aegis.dataset_loaders import GraphBundle
-from aegis.graph_features import build_features, build_transfer_features, to_pyg_data
+from aegis.graph_features import (
+    build_features,
+    build_transfer_features,
+    compute_network_architecture_metrics,
+    to_pyg_data,
+)
 from aegis.text_utils import (
     injection_lexical_score,
     injection_match_spans,
@@ -32,6 +37,7 @@ from .analysis import (
     classify_subject,
     coordination_metrics,
     coordination_participants,
+    detect_architecture_attack_profile,
     evidence_score,
     graph_communities,
     node_evidence_score,
@@ -527,6 +533,10 @@ class MLService:
                         "cluster_id": cluster_id,
                         "community_label": community_labels.get(user_key),
                         "cluster_size": int(cluster_sizes.get(cluster_id, 1)),
+                        "instance_domain": (
+                            metadata.get("instance_domain")
+                            or (user_key.split("@")[-1] if "@" in user_key else "x.com")
+                        ),
                     }
                 )
 
@@ -598,6 +608,22 @@ class MLService:
                 payload_alerts=payload_alert_count,
                 model_trusted=model_trusted,
             )
+            # Compute explainable architecture & attack vector signals
+            nodes_df = pd.DataFrame([n.model_dump() for n in payload.nodes])
+            edges_df = (
+                pd.DataFrame([e.model_dump() for e in payload.edges])
+                if payload.edges
+                else pd.DataFrame(columns=["source", "target", "relation"])
+            )
+            arch_metrics = compute_network_architecture_metrics(nodes_df, edges_df)
+            attack_profile = detect_architecture_attack_profile(
+                architecture=arch_metrics["network_architecture"],
+                metrics=metrics,
+                posts=[p.model_dump() for p in payload.posts],
+                edges=edges,
+                payload_alerts=payload_alert_count,
+            )
+
             signals = [text_score, evidence]
             if model_trusted:
                 signals.append(aggregate)
@@ -607,7 +633,7 @@ class MLService:
                     f"{self._graph_transfer_auc:.2f} on an unseen campaign, so "
                     "its node scores are shown for reference only and the "
                     "verdict rests on the measured coordination features. "
-                    "Retrain notebook 03 with AEGIS_SMOKE_TEST=0 to restore it."
+                    "Retrain notebook 03 with SMOKE_TEST=0 to restore it."
                 )
             headline = float(max(signals))
             return {
@@ -630,6 +656,13 @@ class MLService:
                 "band": triage_band(headline),
                 "reasons": verdict["reasons"],
                 "coordination": metrics,
+                "network_architecture": arch_metrics["network_architecture"],
+                "architecture_confidence": arch_metrics["architecture_confidence"],
+                "architecture_attack_profile": attack_profile,
+                "instance_entropy": arch_metrics["instance_entropy"],
+                "cross_instance_edge_ratio": arch_metrics["cross_instance_edge_ratio"],
+                "hub_dominance_gini": arch_metrics["hub_dominance_gini"],
+                "federation_bridge_centrality": arch_metrics["federation_bridge_centrality"],
                 "edges": edges,
                 # Highlight the ring itself: links where both endpoints carry
                 # coordination evidence or were flagged by the graph model.
@@ -655,6 +688,10 @@ class MLService:
             if 0 <= index < len(account.posts):
                 alert["user_id"] = str(account.posts[index]["user_id"])
 
+        for index, item in enumerate(thread.get("posts", [])):
+            if 0 <= index < len(account.posts):
+                item["user_id"] = str(account.posts[index]["user_id"])
+
         network = self.analyze_network(
             NetworkAnalyzeRequest.model_validate(account.as_network_payload()),
             target=account.handle,
@@ -670,6 +707,9 @@ class MLService:
             "classification": network["classification"],
             "band": triage_band(threat_score),
             "threat_score": threat_score,
+            "network_architecture": network["network_architecture"],
+            "architecture_confidence": network["architecture_confidence"],
+            "architecture_attack_profile": network["architecture_attack_profile"],
             "reasons": network["reasons"],
             "text": thread,
             "network": network,

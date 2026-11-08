@@ -1,7 +1,7 @@
 # Datasets, Provenance, and Data Governance
 
 This document records what each configured dataset contributes, whether it is
-currently usable, and how AEGIS-SN prevents missing data from becoming a false
+currently usable, and how AgentInTheShell prevents missing data from becoming a false
 research claim.
 
 The authoritative machine-readable configuration is

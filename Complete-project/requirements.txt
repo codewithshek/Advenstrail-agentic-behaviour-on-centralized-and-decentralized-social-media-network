@@ -1,5 +1,5 @@
 # ============================================================================
-#  AEGIS-SN  ·  Adversarial agEntic Graph & Inference System for Social Networks
+#  AgentInTheShell  ·  Adversarial Agentic Graph & Inference System for Social Networks
 #  "Identification and classification of adversarial agentic AI behaviors in
 #   centralized and decentralized social networks."
 # ----------------------------------------------------------------------------

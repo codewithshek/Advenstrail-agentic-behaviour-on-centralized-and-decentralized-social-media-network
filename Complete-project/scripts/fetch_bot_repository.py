@@ -58,7 +58,7 @@ LARGE = {"caverlee-2011", "cresci-2017", "cresci-2015"}
 KNOWN_BROKEN = {"kaiser"}
 
 _CTX = ssl.create_default_context()
-_HEADERS = {"User-Agent": "Mozilla/5.0 (AEGIS-SN academic research fetcher)"}
+_HEADERS = {"User-Agent": "Mozilla/5.0 (AgentInTheShell academic research fetcher)"}
 
 
 def _open(url: str, method: str = "GET"):

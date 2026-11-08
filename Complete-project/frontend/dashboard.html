@@ -623,59 +623,434 @@
         background: var(--danger);
       }
 
+      .card[data-no-depth="true"],
+      section[aria-label="Per-account detail"],
+      #per-account-card {
+        transform: none !important;
+        transform-style: flat !important;
+        perspective: none !important;
+        will-change: auto !important;
+        box-shadow: 0 4px 20px var(--shadow) !important;
+      }
+
+      .card[data-no-depth="true"]:hover,
+      section[aria-label="Per-account detail"]:hover,
+      #per-account-card:hover {
+        transform: none !important;
+      }
+
+      .card[data-no-depth="true"]::after,
+      section[aria-label="Per-account detail"]::after,
+      #per-account-card::after {
+        display: none !important;
+      }
+
+      /* Linguistic anomaly breakdown filter bar & organized cards */
+      .payload-filter-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 12px 18px;
+        border-bottom: 1px solid var(--line);
+        background: rgba(0, 0, 0, 0.18);
+        align-items: center;
+      }
+
+      .payload-filter-label {
+        font-size: 0.7rem;
+        color: var(--dim);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-right: 4px;
+      }
+
+      .filter-chip {
+        padding: 4px 11px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--paper);
+        font-size: 0.73rem;
+        cursor: pointer;
+        transition: background-color 140ms ease, border-color 140ms ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .filter-chip:hover {
+        border-color: var(--cyan);
+        background: rgba(201, 255, 61, 0.08);
+      }
+
+      .filter-chip.active {
+        background: var(--cyan);
+        color: var(--button-ink);
+        border-color: var(--cyan);
+        font-weight: 600;
+      }
+
+      .filter-chip .chip-count {
+        padding: 1px 6px;
+        border-radius: 999px;
+        font-size: 0.65rem;
+        background: rgba(255, 255, 255, 0.16);
+      }
+
+      .filter-chip.active .chip-count {
+        background: rgba(0, 0, 0, 0.25);
+        color: var(--button-ink);
+      }
+
       .payloads {
         display: grid;
-        gap: 10px;
+        gap: 12px;
         padding: 18px;
       }
 
-      .payload {
-        --pointer-x: 50%;
-        --pointer-y: 50%;
-        position: relative;
-        overflow: hidden;
-        padding: 12px 13px;
+      .payload-card {
         border: 1px solid rgba(255, 95, 109, 0.3);
-        border-left: 3px solid var(--danger);
-        border-radius: 10px;
-        background: rgba(255, 95, 109, 0.07);
-        box-shadow: 0 12px 28px color-mix(in srgb, var(--danger) 9%, transparent);
-        transform-style: preserve-3d;
-        will-change: transform;
+        border-left: 4px solid var(--danger);
+        border-radius: 12px;
+        background: rgba(255, 95, 109, 0.06);
+        padding: 14px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        transform: none !important;
+        transition: border-color 140ms ease, background 140ms ease;
       }
 
-      .payload q {
+      .payload-card:hover {
+        border-color: rgba(255, 95, 109, 0.5);
+        background: rgba(255, 95, 109, 0.09);
+      }
+
+      .payload-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .payload-account-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid var(--line);
+        padding: 3px 9px;
+        border-radius: 6px;
+        font-family: ui-monospace, Consolas, monospace;
+        font-size: 0.74rem;
+        color: var(--paper);
+        cursor: pointer;
+        transition: all 140ms ease;
+      }
+
+      .payload-account-pill:hover {
+        border-color: var(--cyan);
+        color: var(--cyan);
+        background: rgba(201, 255, 61, 0.08);
+      }
+
+      .payload-severity-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 9px;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 600;
+      }
+
+      .payload-severity-pill.bad {
+        background: rgba(255, 95, 109, 0.18);
+        color: #ff9da6;
+        border: 1px solid rgba(255, 95, 109, 0.35);
+      }
+
+      .payload-severity-pill.warn {
+        background: rgba(255, 190, 85, 0.18);
+        color: #ffcf87;
+        border: 1px solid rgba(255, 190, 85, 0.35);
+      }
+
+      .payload-reason-callout {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #ff8b97;
+        font-size: 0.76rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+      }
+
+      .payload-content-box {
+        background: rgba(0, 0, 0, 0.28);
+        border-radius: 8px;
+        padding: 11px 13px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .payload-content-box q {
         display: block;
         font-family: ui-monospace, Consolas, monospace;
-        font-size: 0.8rem;
+        font-size: 0.81rem;
         line-height: 1.6;
+        color: var(--paper);
       }
 
-      .payload mark {
-        padding: 1px 3px;
+      .payload-content-box mark {
+        padding: 1px 4px;
         border-radius: 4px;
         background: var(--danger);
         color: #fff;
-        font-weight: 750;
-        box-decoration-break: clone;
-        -webkit-box-decoration-break: clone;
+        font-weight: 700;
       }
 
-      .payload .xai-label {
-        display: block;
-        margin-bottom: 6px;
-        color: var(--danger);
-        font-size: 0.66rem;
-        font-weight: 800;
-        letter-spacing: 0.12em;
+      .payload-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        font-size: 0.72rem;
+      }
+
+      .payload-triggers {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .payload-triggers-label {
+        color: var(--dim);
+        font-size: 0.68rem;
         text-transform: uppercase;
+        font-weight: 600;
       }
 
-      .payload .tags {
+      .focus-account-btn {
+        background: none;
+        border: none;
+        color: var(--cyan);
+        font-size: 0.74rem;
+        cursor: pointer;
+        padding: 4px 6px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+
+      .focus-account-btn:hover {
+        opacity: 0.8;
+      }
+
+      /* Per-account detail Inspector Panel */
+      .account-inspector-panel {
+        margin: 14px 18px 18px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: color-mix(in srgb, var(--panel-2) 95%, var(--ink));
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+        transform: none !important;
+      }
+
+      .inspector-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 13px 16px;
+        background: rgba(255, 255, 255, 0.03);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .inspector-account-id {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .inspector-account-name {
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 1.02rem;
+        font-weight: 700;
+        color: var(--paper);
+      }
+
+      .inspector-close-btn {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        color: var(--muted);
+        font-size: 0.75rem;
+        padding: 5px 10px;
+        cursor: pointer;
+        transition: background-color 120ms ease, color 120ms ease;
+      }
+
+      .inspector-close-btn:hover {
+        color: var(--paper);
+        border-color: var(--dim);
+        background: rgba(255, 255, 255, 0.12);
+      }
+
+      .inspector-body {
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 13px;
+      }
+
+      .inspector-stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 10px;
+      }
+
+      .stat-card {
+        background: rgba(0, 0, 0, 0.25);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 9px 12px;
+      }
+
+      .stat-card-label {
+        font-size: 0.66rem;
+        color: var(--dim);
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        margin-bottom: 4px;
+      }
+
+      .stat-card-val {
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--paper);
+      }
+
+      .why-flagged-section {
+        border-radius: 10px;
+        padding: 14px 15px;
+        border: 1px solid rgba(255, 95, 109, 0.35);
+        background: rgba(255, 95, 109, 0.06);
+      }
+
+      .why-flagged-section.clean {
+        border-color: rgba(74, 222, 128, 0.3);
+        background: rgba(74, 222, 128, 0.05);
+      }
+
+      .why-flagged-section.coordination {
+        border-color: rgba(255, 190, 85, 0.35);
+        background: rgba(255, 190, 85, 0.06);
+      }
+
+      .why-flagged-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 0.88rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+
+      .why-flagged-section.danger .why-flagged-header {
+        color: #ff7e8c;
+      }
+
+      .why-flagged-section.coordination .why-flagged-header {
+        color: var(--amber);
+      }
+
+      .why-flagged-section.clean .why-flagged-header {
+        color: var(--good);
+      }
+
+      .why-flagged-desc {
+        font-size: 0.79rem;
+        line-height: 1.5;
+        color: var(--muted);
+        margin: 0 0 10px 0;
+      }
+
+      .flagged-posts-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 8px;
+      }
+
+      .account-post-item {
+        background: rgba(0, 0, 0, 0.32);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 8px;
+        padding: 11px 13px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .account-post-item.flagged-post {
+        border-left: 3px solid var(--danger);
+        background: rgba(255, 95, 109, 0.08);
+        border-color: rgba(255, 95, 109, 0.32);
+      }
+
+      .account-post-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 0.7rem;
+      }
+
+      .account-post-body {
+        font-family: ui-monospace, Consolas, monospace;
+        font-size: 0.8rem;
+        line-height: 1.55;
+        color: var(--paper);
+      }
+
+      .account-post-body mark {
+        padding: 1px 4px;
+        border-radius: 3px;
+        background: var(--danger);
+        color: #fff;
+        font-weight: 700;
+      }
+
+      .feature-chips {
         display: flex;
         flex-wrap: wrap;
         gap: 6px;
-        margin-top: 9px;
+        margin-top: 8px;
+      }
+
+      .feature-chip {
+        padding: 3px 8px;
+        border-radius: 5px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--line);
+        font-size: 0.71rem;
+        color: var(--muted);
+      }
+
+      .feature-chip b {
+        color: var(--paper);
+        margin-left: 4px;
       }
 
       .tag {
@@ -702,6 +1077,19 @@
         width: 100%;
         border-collapse: collapse;
         font-size: 0.79rem;
+        transform: none !important;
+        transform-style: flat !important;
+      }
+
+      #account-table tbody tr {
+        cursor: pointer;
+        transition: background 0.15s ease;
+        transform: none !important;
+      }
+
+      #account-table tbody tr:hover td {
+        background: rgba(255, 255, 255, 0.05);
+        transform: none !important;
       }
 
       th,
@@ -967,6 +1355,255 @@
         clip: rect(0 0 0 0);
       }
 
+      /* Architecture Benchmark Bar & Quick-Load Buttons */
+      .preset-benchmark-bar {
+        margin-bottom: 16px;
+        padding: 14px 18px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: color-mix(in srgb, var(--panel-2) 90%, transparent);
+        box-shadow: 0 4px 20px var(--shadow);
+      }
+      .preset-benchmark-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .preset-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 0.9rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--cyan);
+      }
+      .preset-sub {
+        font-size: 0.76rem;
+        color: var(--muted);
+      }
+      .preset-buttons {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 10px;
+      }
+      .preset-btn {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 10px 14px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--subtle);
+        color: var(--paper);
+        font-family: "DM Sans", sans-serif;
+        font-size: 0.82rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-align: left;
+        transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .preset-btn:hover {
+        background: color-mix(in srgb, var(--cyan) 12%, transparent);
+        border-color: var(--cyan);
+        transform: translateY(-2px);
+      }
+      .preset-btn.decent:hover {
+        background: color-mix(in srgb, #a78bfa 15%, transparent);
+        border-color: #a78bfa;
+      }
+      .preset-btn.compare {
+        border-color: color-mix(in srgb, var(--amber) 40%, transparent);
+      }
+      .preset-btn.compare:hover {
+        background: color-mix(in srgb, var(--amber) 15%, transparent);
+        border-color: var(--amber);
+      }
+      .preset-tag {
+        font-size: 0.65rem;
+        font-weight: 700;
+        padding: 3px 6px;
+        border-radius: 6px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+      .tag-cent {
+        background: color-mix(in srgb, var(--cyan) 20%, transparent);
+        color: var(--cyan);
+      }
+      .tag-decent {
+        background: color-mix(in srgb, #a78bfa 25%, transparent);
+        color: #c4b5fd;
+      }
+      .tag-cmp {
+        background: color-mix(in srgb, var(--amber) 25%, transparent);
+        color: var(--amber);
+      }
+
+      /* Architecture Classification Banner & Telemetry Card */
+      .arch-banner-card {
+        border-left: 4px solid var(--cyan);
+        transition: border-color 240ms ease;
+      }
+      .arch-banner-card.decentralized {
+        border-left-color: #a78bfa;
+      }
+      .arch-badge-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .arch-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 12px;
+        border-radius: 999px;
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        background: rgba(201, 255, 61, 0.15);
+        color: var(--cyan);
+        border: 1px solid rgba(201, 255, 61, 0.35);
+      }
+      .arch-badge.decentralized {
+        background: rgba(167, 139, 250, 0.18);
+        color: #c4b5fd;
+        border-color: rgba(167, 139, 250, 0.45);
+      }
+      .attack-mode-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 12px;
+        border-radius: 999px;
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        background: rgba(255, 77, 94, 0.15);
+        color: var(--danger);
+        border: 1px solid rgba(255, 77, 94, 0.35);
+      }
+      .arch-telemetry-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 12px;
+        padding: 16px 18px 18px;
+      }
+      .arch-stat-box {
+        padding: 12px 14px;
+        border-radius: 10px;
+        background: var(--subtle);
+        border: 1px solid var(--line);
+      }
+      .arch-stat-box small {
+        display: block;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--dim);
+        margin-bottom: 6px;
+      }
+      .arch-stat-box strong {
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: var(--paper);
+      }
+      .arch-stat-box .stat-sub {
+        display: block;
+        font-size: 0.72rem;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+
+      /* Side-by-Side Comparison Drawer */
+      .compare-drawer {
+        margin-bottom: 20px;
+        border: 1px solid color-mix(in srgb, var(--cyan) 35%, var(--line));
+        background: var(--panel);
+        border-radius: 14px;
+        overflow: hidden;
+      }
+      .compare-table-wrapper {
+        overflow-x: auto;
+        padding: 16px 18px;
+      }
+      .compare-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.82rem;
+      }
+      .compare-table th {
+        text-align: left;
+        padding: 10px 14px;
+        background: var(--subtle);
+        color: var(--dim);
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 0.74rem;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        border-bottom: 1px solid var(--line);
+      }
+      .compare-table td {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        vertical-align: top;
+      }
+      .compare-table tr:hover td {
+        background: color-mix(in srgb, var(--cyan) 4%, transparent);
+      }
+      .compare-table strong {
+        color: var(--paper);
+        font-weight: 600;
+      }
+
+      /* D3 Layout Extensions */
+      @keyframes crossBridgePulse {
+        0% { stroke-dashoffset: 0; }
+        100% { stroke-dashoffset: -20; }
+      }
+      .link.cross-instance {
+        stroke: #ff4d5e !important;
+        stroke-width: 2.4px !important;
+        stroke-dasharray: 6 4 !important;
+        animation: crossBridgePulse 1s linear infinite;
+        opacity: 0.95 !important;
+      }
+      .instance-hull {
+        fill-opacity: 0.12;
+        stroke-width: 1.5px;
+        stroke-dasharray: 4 3;
+        pointer-events: none;
+      }
+      .instance-label {
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        fill: #c4b5fd;
+        pointer-events: none;
+        opacity: 0.85;
+      }
+      .radial-ring {
+        fill: none;
+        stroke: var(--cyan);
+        stroke-opacity: 0.22;
+        stroke-width: 1.4px;
+        stroke-dasharray: 5 4;
+        pointer-events: none;
+      }
+
       @media (prefers-reduced-motion: reduce) {
         *,
         *::before,
@@ -994,6 +1631,38 @@
     </header>
 
     <main>
+      <!-- -------------------- ARCHITECTURE BENCHMARK BAR -------------------- -->
+      <section class="preset-benchmark-bar" aria-label="Quick-load architecture datasets">
+        <div class="preset-benchmark-header">
+          <div class="preset-title">
+            <span>⚡ Architecture Benchmarks</span>
+            <span class="preset-sub">One-click evaluation fixtures for Centralized vs. Decentralized networks</span>
+          </div>
+          <button class="preset-btn compare" id="btn-open-compare" title="Open Side-by-Side Architecture Matrix">
+            <span>⚖️ Compare Centralized vs. Decentralized</span>
+            <span class="preset-tag tag-cmp">MATRIX</span>
+          </button>
+        </div>
+        <div class="preset-buttons">
+          <button class="preset-btn cent" data-fixture="centralized_x_hashtag_flood" title="Centralized: X Hashtag Flood (Algorithmic Trend Gaming)">
+            <span>🏛️ X Hashtag Flood</span>
+            <span class="preset-tag tag-cent">CENTRAL</span>
+          </button>
+          <button class="preset-btn cent" data-fixture="centralized_ig_shill_ring" title="Centralized: Instagram Hub Shill Ring (Astroturfing Hub)">
+            <span>🛍️ Hub Shill Ring</span>
+            <span class="preset-tag tag-cent">CENTRAL</span>
+          </button>
+          <button class="preset-btn decent" data-fixture="decentralized_mastodon_bridge_attack" title="Decentralized: Mastodon Cross-Instance Bridge (ActivityPub Sybil Bridge)">
+            <span>🐘 Mastodon Bridge</span>
+            <span class="preset-tag tag-decent">FEDERATED</span>
+          </button>
+          <button class="preset-btn decent" data-fixture="decentralized_a2a_protocol_spoof" title="Decentralized: A2A Protocol Spoof (Agent Discovery & MCP Token Hijack)">
+            <span>🤖 A2A Protocol Spoof</span>
+            <span class="preset-tag tag-decent">FEDERATED</span>
+          </button>
+        </div>
+      </section>
+
       <!-- ------------------------------ INPUTS ------------------------------ -->
       <section class="card" aria-label="Analysis input">
         <div class="tabs" role="tablist">
@@ -1085,6 +1754,94 @@
 
       <!-- ------------------------------ OUTPUTS ----------------------------- -->
       <div class="stack">
+        <!-- ---------------- ARCHITECTURE CLASSIFICATION BANNER ---------------- -->
+        <section class="card arch-banner-card" id="arch-banner-card" aria-label="Network Architecture & Topology Telemetry">
+          <div class="card-head">
+            <div class="arch-badge-row">
+              <span class="arch-badge centralized" id="arch-badge">CENTRALIZED TOPOLOGY</span>
+              <span class="attack-mode-badge" id="attack-mode-badge">ATTACK: ALGORITHMIC RETWEET RING</span>
+            </div>
+            <span id="arch-confidence-meta" class="preset-sub" style="font-weight: 600; color: var(--paper);">Topology Confidence: 100.0%</span>
+          </div>
+          <div class="arch-telemetry-grid">
+            <div class="arch-stat-box">
+              <small>Instance Entropy (H)</small>
+              <strong id="stat-entropy">0.000</strong>
+              <span class="stat-sub" id="stat-entropy-sub">Single domain namespace</span>
+            </div>
+            <div class="arch-stat-box">
+              <small>Cross-Instance Ratio</small>
+              <strong id="stat-cross-ratio">0.0%</strong>
+              <span class="stat-sub" id="stat-cross-ratio-sub">All edges internal / central</span>
+            </div>
+            <div class="arch-stat-box">
+              <small>Hub Dominance (Gini)</small>
+              <strong id="stat-gini">0.584</strong>
+              <span class="stat-sub" id="stat-gini-sub">Star-hub amplification</span>
+            </div>
+            <div class="arch-stat-box">
+              <small>Bridge Centrality</small>
+              <strong id="stat-bridge-centrality">0.000</strong>
+              <span class="stat-sub" id="stat-bridge-centrality-sub">No boundary gateways</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ------------ SIDE-BY-SIDE ARCHITECTURE COMPARISON DRAWER ----------- -->
+        <section class="card compare-drawer" id="compare-drawer" style="display: none;" aria-label="Side-by-Side Architecture Comparison Matrix">
+          <div class="card-head">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-weight: 700; font-size: 14px;">Side-by-Side Architecture Comparison</span>
+              <span class="preset-tag tag-cmp">Academic Review Matrix</span>
+            </div>
+            <button class="ghost" id="btn-close-compare" style="padding: 4px 10px;">Close Matrix ✕</button>
+          </div>
+          <div class="compare-table-wrapper">
+            <table class="compare-table">
+              <thead>
+                <tr>
+                  <th>Dimension</th>
+                  <th>Centralized Social Network (X, Instagram)</th>
+                  <th>Decentralized / Federated (ActivityPub, A2A)</th>
+                  <th>Observed System Delta</th>
+                </tr>
+              </thead>
+              <tbody id="compare-table-body">
+                <tr>
+                  <td><strong>Topology & Identity</strong></td>
+                  <td>Single global namespace (<code>@user</code>); star/hub-and-spoke with high Gini degree inequality.</td>
+                  <td>Multi-instance federated handles (<code>@user@instance.social</code>, <code>did:plc</code>); multi-cluster pod topology.</td>
+                  <td><span class="preset-tag tag-cent">Star Hub</span> vs. <span class="preset-tag tag-decent">Multi-Cluster</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Primary Attack Vector</strong></td>
+                  <td><strong>Algorithmic Trend Gaming:</strong> Synchronized hashtag flooding, rapid retweet rings, reply-hijacking on influencer hubs.</td>
+                  <td><strong>Protocol Exploits:</strong> Cross-instance Sybil bridge attacks, defederation evasion, forged A2A discovery responses, MCP token hijacking.</td>
+                  <td><span class="attack-mode-badge" style="font-size:0.65rem;">Hashtag Flood / RT Ring</span> vs. <span class="attack-mode-badge" style="font-size:0.65rem; background:rgba(167,139,250,0.15); color:#c4b5fd; border-color:rgba(167,139,250,0.35);">Sybil Bridge / Protocol Spoof</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Entropy & Bridge Centrality</strong></td>
+                  <td>$H_{\text{instance}} = 0.00$, Cross-Instance Ratio $= 0.0\%$, Gateway Betweenness $= 0.00$.</td>
+                  <td>$H_{\text{instance}} > 0.40$, Cross-Instance Ratio $> 10.0\%$, Bridge Centrality $\ge 0.25$.</td>
+                  <td><strong>Δ Entropy:</strong> +0.50+ on federated networks; cross-instance edges highlighted in red.</td>
+                </tr>
+                <tr>
+                  <td><strong>Content & XAI Markers</strong></td>
+                  <td>Direct prompt injection / jailbreak phrases; commercial coupon codes; synchronized hashtags.</td>
+                  <td><code>[A2A_DISCOVERY_SPOOF]</code>, <code>[MCP_TOKEN_HIJACK]</code>, cross-instance relay directives, defederation bypass triggers.</td>
+                  <td>Lexical XAI highlights architecture-specific exploit markers in threat inspector.</td>
+                </tr>
+                <tr>
+                  <td><strong>GraphSAGE + DeBERTa Fusion</strong></td>
+                  <td>Late fusion calibrated across temporal synchrony, reciprocity, and DeBERTa token scores.</td>
+                  <td>Topology branch isolates rogue instance pods and cross-boundary bridge nodes before calibrated fusion.</td>
+                  <td>Both pipelines feed unified calibrated Bayesian late-fusion risk score.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
         <section class="card" aria-label="Verdict">
           <div class="card-head">
             <span>Threat report</span>
@@ -1129,9 +1886,13 @@
           </div>
         </section>
 
-        <section class="card" aria-label="Linguistic anomaly breakdown">
-          <h2>Linguistic anomaly breakdown</h2>
+        <section class="card" aria-label="Linguistic anomaly breakdown" data-no-depth="true">
+          <div class="card-head">
+            <span>Linguistic anomaly breakdown</span>
+            <span id="payload-count-badge" style="text-transform: none; letter-spacing: 0"></span>
+          </div>
           <div class="metric-grid" id="text-metrics"></div>
+          <div id="payload-filter-bar" class="payload-filter-bar" style="display:none;"></div>
           <div id="payload-container">
             <div class="empty" id="payload-empty">
               No prompt-injection or jailbreak phrasing detected.
@@ -1160,11 +1921,15 @@
           </div>
         </section>
 
-        <section class="card" aria-label="Per-account detail">
+        <section class="card" aria-label="Per-account detail" data-no-depth="true" id="per-account-card">
           <div class="card-head">
             <span>Per-account detail</span>
-            <span id="account-count" style="text-transform: none; letter-spacing: 0"></span>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span id="selected-account-badge" class="badge cyan" style="display:none;text-transform:none;letter-spacing:0;font-size:0.75rem;padding:3px 9px;"></span>
+              <span id="account-count" style="text-transform: none; letter-spacing: 0"></span>
+            </div>
           </div>
+          <div id="account-inspector" class="account-inspector-panel" style="display:none;"></div>
           <div id="account-table">
             <div class="empty">Account-level scores appear after a network analysis.</div>
           </div>
@@ -1304,6 +2069,12 @@
         let lastGraph = { nodes: [], edges: [], suspicious: [] };
         let simulation = null;
         let clearGraphSelection = () => {};
+        let applyGraphSelection = null;
+        let currentTextReport = null;
+        let currentNetworkReport = null;
+        let currentAllPosts = [];
+        let selectedNodeId = null;
+        let activePayloadAccountFilter = null;
 
         // ---------------------------------------------------------------- API
         async function callApi(path, body) {
@@ -1743,6 +2514,66 @@
             "<li>No supporting evidence returned.</li>";
         }
 
+        function renderArchitectureBanner(network) {
+          const card = el("arch-banner-card");
+          const badge = el("arch-badge");
+          const attackBadge = el("attack-mode-badge");
+          const meta = el("arch-confidence-meta");
+          const statEntropy = el("stat-entropy");
+          const statEntropySub = el("stat-entropy-sub");
+          const statCrossRatio = el("stat-cross-ratio");
+          const statCrossRatioSub = el("stat-cross-ratio-sub");
+          const statGini = el("stat-gini");
+          const statGiniSub = el("stat-gini-sub");
+          const statBridge = el("stat-bridge-centrality");
+          const statBridgeSub = el("stat-bridge-centrality-sub");
+
+          if (!network || !network.network_architecture) {
+            card.classList.remove("decentralized");
+            badge.className = "arch-badge centralized";
+            badge.textContent = "CENTRALIZED TOPOLOGY";
+            attackBadge.textContent = "ATTACK: STANDBY / BENCHMARK READY";
+            meta.textContent = "Topology Confidence: —";
+            statEntropy.textContent = "0.000";
+            statEntropySub.textContent = "Single domain namespace";
+            statCrossRatio.textContent = "0.0%";
+            statCrossRatioSub.textContent = "All edges internal / central";
+            statGini.textContent = "0.000";
+            statGiniSub.textContent = "In-degree dispersion";
+            statBridge.textContent = "0.000";
+            statBridgeSub.textContent = "No boundary gateways";
+            return;
+          }
+
+          const isDecentralized = network.network_architecture === "decentralized_federated";
+          card.classList.toggle("decentralized", isDecentralized);
+
+          badge.className = `arch-badge ${isDecentralized ? "decentralized" : "centralized"}`;
+          badge.textContent = isDecentralized ? "DECENTRALIZED / FEDERATED TOPOLOGY" : "CENTRALIZED TOPOLOGY";
+
+          const attackProfile = network.architecture_attack_profile || (isDecentralized ? "Cross-Instance Sybil Bridge Attack" : "Algorithmic Retweet Ring");
+          attackBadge.textContent = `ATTACK: ${String(attackProfile).toUpperCase()}`;
+
+          const confPercent = ((network.architecture_confidence ?? 1) * 100).toFixed(1);
+          meta.textContent = `Topology Confidence: ${confPercent}%`;
+
+          const entropy = Number(network.instance_entropy ?? 0);
+          statEntropy.textContent = entropy.toFixed(3);
+          statEntropySub.textContent = isDecentralized ? "Multi-instance partition (H > 0)" : "Single domain namespace (H = 0)";
+
+          const crossRatio = Number(network.cross_instance_edge_ratio ?? 0);
+          statCrossRatio.textContent = `${(crossRatio * 100).toFixed(1)}%`;
+          statCrossRatioSub.textContent = isDecentralized ? "Cross-instance federation bridges" : "Internal recommendation links";
+
+          const gini = Number(network.hub_dominance_gini ?? 0);
+          statGini.textContent = gini.toFixed(3);
+          statGiniSub.textContent = gini >= 0.5 ? "High hub-and-spoke concentration" : "Distributed peer-to-peer mesh";
+
+          const bridge = Number(network.federation_bridge_centrality ?? 0);
+          statBridge.textContent = bridge.toFixed(3);
+          statBridgeSub.textContent = bridge > 0.05 ? "Boundary gateway / Sybil bridge" : "No cross-server bottlenecks";
+        }
+
         function escapeHtml(value) {
           return String(value).replace(
             /[&<>"']/g,
@@ -1811,10 +2642,15 @@
         }
 
         function renderTextBreakdown(text) {
+          currentTextReport = text;
           if (!text) {
             el("text-metrics").innerHTML =
               '<div class="empty">No post text supplied, so the language branch did not run.</div>';
             el("payload-container").innerHTML = "";
+            const filterBar = el("payload-filter-bar");
+            if (filterBar) filterBar.style.display = "none";
+            const badge = el("payload-count-badge");
+            if (badge) badge.textContent = "";
             return;
           }
           const ai = text.peak_score ?? text.ai_generation_probability ?? text.score ?? 0;
@@ -1863,50 +2699,371 @@
             ),
           ].join("");
 
+          const badge = el("payload-count-badge");
+          if (badge) {
+            badge.textContent = alerts.length ? `${alerts.length} alert(s) detected` : "Clean";
+          }
+
+          renderPayloadsList(alerts);
+        }
+
+        function renderPayloadsList(alerts) {
           const container = el("payload-container");
-          if (!alerts.length) {
+          const filterBar = el("payload-filter-bar");
+          if (!alerts || !alerts.length) {
             container.innerHTML =
               '<div class="empty">No prompt-injection or jailbreak phrasing detected.</div>';
+            if (filterBar) filterBar.style.display = "none";
             return;
           }
-          container.innerHTML = `<div class="payloads">${alerts
-            .map(
-              (alert) => `
-                <div class="payload">
-                  <span class="xai-label">Why this was flagged</span>
-                  <q>${highlightTriggerSpans(alert)}</q>
-                  <div class="tags">
-                    ${(alert.matched_phrases || [])
-                      .map((phrase) => `<span class="tag">${escapeHtml(phrase)}</span>`)
-                      .join("")}
-                    <span class="tag neutral">severity ${percent(alert.severity)}</span>
-                    ${
-                      alert.user_id
-                        ? `<span class="tag neutral">${escapeHtml(alert.user_id)}</span>`
-                        : ""
-                    }
-                  </div>
-                </div>`,
-            )
-            .join("")}</div>`;
-          if (!reduceMotion) {
-            gsap.from(".payload", {
-              opacity: 0,
-              x: -10,
-              duration: 0.35,
-              stagger: 0.06,
-              ease: "power2.out",
-            });
+
+          const accountCounts = new Map();
+          alerts.forEach((alert) => {
+            const uid = alert.user_id || "Unattributed";
+            accountCounts.set(uid, (accountCounts.get(uid) || 0) + 1);
+          });
+
+          if (filterBar) {
+            const isFiltered = Boolean(activePayloadAccountFilter);
+            filterBar.style.display = "flex";
+            filterBar.innerHTML = `
+              <span class="payload-filter-label">Filter alerts by account:</span>
+              <button class="filter-chip ${!isFiltered ? "active" : ""}" onclick="setPayloadAccountFilter(null)">
+                All accounts <span class="chip-count">${alerts.length}</span>
+              </button>
+              ${[...accountCounts.entries()]
+                .map(
+                  ([uid, count]) => `
+                  <button class="filter-chip ${activePayloadAccountFilter === uid ? "active" : ""}" onclick="setPayloadAccountFilter('${escapeHtml(uid)}')">
+                    @${escapeHtml(uid)} <span class="chip-count">${count}</span>
+                  </button>`,
+                )
+                .join("")}
+              ${
+                isFiltered
+                  ? `
+                <button class="filter-chip" style="margin-left:auto;color:var(--dim);" onclick="setPayloadAccountFilter(null)">
+                  ✕ Show all accounts
+                </button>`
+                  : ""
+              }
+            `;
+          }
+
+          const displayedAlerts = activePayloadAccountFilter
+            ? alerts.filter((a) => (a.user_id || "Unattributed") === activePayloadAccountFilter)
+            : alerts;
+
+          if (!displayedAlerts.length) {
+            container.innerHTML = `
+              <div class="empty" style="display:flex;align-items:center;justify-content:space-between;">
+                <span>No linguistic payload alerts for account @${escapeHtml(activePayloadAccountFilter)}.</span>
+                <button class="ghost" onclick="setPayloadAccountFilter(null)">Show all accounts</button>
+              </div>`;
+            return;
+          }
+
+          container.innerHTML = `
+            <div class="payloads">
+              ${displayedAlerts
+                .map(
+                  (alert) => `
+                  <div class="payload-card" data-user-id="${escapeHtml(alert.user_id || "")}">
+                    <div class="payload-card-header">
+                      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <span class="payload-account-pill" onclick="selectAccount('${escapeHtml(alert.user_id || "")}')" title="Click to view details for this account in Per-account detail">
+                          👤 @${escapeHtml(alert.user_id || "unattributed")}
+                        </span>
+                        ${
+                          alert.post_index !== undefined
+                            ? `<span class="badge neutral" style="font-size:0.68rem;padding:2px 7px;border-radius:4px;background:rgba(255,255,255,0.06);color:var(--muted)">Post #${alert.post_index + 1}</span>`
+                            : ""
+                        }
+                      </div>
+                      <div class="payload-severity-pill ${alert.severity >= 0.7 ? "bad" : "warn"}">
+                        Severity ${percent(alert.severity)}
+                      </div>
+                    </div>
+
+                    <div class="payload-reason-callout">
+                      <span>⚠️</span>
+                      <span>Why this was flagged: Prompt Injection / Instruction Override in Post</span>
+                    </div>
+
+                    <div class="payload-content-box">
+                      <q>${highlightTriggerSpans(alert)}</q>
+                    </div>
+
+                    <div class="payload-footer">
+                      <div class="payload-triggers">
+                        <span class="payload-triggers-label">Matched triggers:</span>
+                        ${(alert.matched_phrases || [])
+                          .map((phrase) => `<span class="tag" style="background:rgba(255,77,94,0.14);border-color:var(--danger);color:#ff9da6;">${escapeHtml(phrase)}</span>`)
+                          .join("")}
+                      </div>
+                      <button class="focus-account-btn" onclick="selectAccount('${escapeHtml(alert.user_id || "")}')">
+                        Inspect account in Per-account detail →
+                      </button>
+                    </div>
+                  </div>`,
+                )
+                .join("")}
+            </div>`;
+        }
+
+        function setPayloadAccountFilter(userId) {
+          activePayloadAccountFilter = userId;
+          renderPayloadsList(currentTextReport?.payload_alerts || []);
+          if (userId) {
+            selectAccount(userId);
           }
         }
 
+        function syncPayloadFilterWithAccount(nodeId) {
+          const alerts = currentTextReport?.payload_alerts || [];
+          const hasAlerts = alerts.some((a) => a.user_id === nodeId);
+          if (nodeId && hasAlerts) {
+            activePayloadAccountFilter = nodeId;
+            renderPayloadsList(alerts);
+          } else if (!nodeId && activePayloadAccountFilter) {
+            activePayloadAccountFilter = null;
+            renderPayloadsList(alerts);
+          }
+        }
+
+        function renderAccountInspector(nodeId) {
+          const inspector = el("account-inspector");
+          const badge = el("selected-account-badge");
+          if (!inspector) return;
+          if (!nodeId) {
+            inspector.style.display = "none";
+            inspector.innerHTML = "";
+            if (badge) {
+              badge.style.display = "none";
+              badge.textContent = "";
+            }
+            return;
+          }
+
+          const nodes = currentNetworkReport?.nodes || [];
+          const node = nodes.find((n) => n.user_id === nodeId) || {
+            user_id: nodeId,
+            screen_name: nodeId,
+            score: 0,
+            evidence_score: 0,
+            cluster_id: 0,
+            top_features: {},
+            features: {},
+          };
+
+          if (badge) {
+            badge.style.display = "inline-block";
+            badge.textContent = `Inspecting: @${node.screen_name || node.user_id}`;
+          }
+
+          const userAlerts = (currentTextReport?.payload_alerts || []).filter(
+            (a) => a.user_id === nodeId,
+          );
+
+          const userPosts = (currentAllPosts || []).filter(
+            (p) => p.user_id === nodeId,
+          );
+
+          const statusClass = node.is_target
+            ? "target"
+            : node.coordinated
+              ? "bad"
+              : node.label === "adversarial" || userAlerts.length
+                ? "bad"
+                : "ok";
+
+          const statusText = node.is_target
+            ? "Target Account"
+            : node.coordinated
+              ? "Coordinated Swarm"
+              : userAlerts.length
+                ? "Flagged (Malicious Post)"
+                : node.label === "adversarial"
+                  ? "Flagged Account"
+                  : "Clean / Organic";
+
+          let flagReasonMarkup = "";
+          if (userAlerts.length > 0) {
+            flagReasonMarkup = `
+              <div class="why-flagged-section danger">
+                <div class="why-flagged-header">
+                  <span>🚨 Why this account was flagged: Malicious Post Content (${userAlerts.length} payload ${userAlerts.length > 1 ? "alerts" : "alert"})</span>
+                </div>
+                <p class="why-flagged-desc">
+                  This account was flagged because its post(s) contain explicit adversarial prompt-injection or jailbreak instructions targeting downstream AI systems.
+                </p>
+                <div class="flagged-posts-list">
+                  ${userAlerts
+                    .map(
+                      (alert, idx) => `
+                      <div class="account-post-item flagged-post">
+                        <div class="account-post-meta">
+                          <div style="display:flex;align-items:center;gap:6px;">
+                            <span class="pill bad">Flagged Post #${(alert.post_index ?? idx) + 1}</span>
+                            <span class="pill bad">Severity: ${percent(alert.severity)}</span>
+                          </div>
+                          <span style="color: var(--danger); font-size: 0.72rem; font-weight: 600;">Prompt Injection Detected</span>
+                        </div>
+                        <div class="account-post-body">
+                          <q>${highlightTriggerSpans(alert)}</q>
+                          ${
+                            alert.post_text &&
+                            alert.post_text.trim() !== String(alert.sentence || "").trim()
+                              ? `<div style="margin-top:6px;font-size:0.75rem;color:var(--dim);line-height:1.4;"><b style="color:var(--muted)">Full post:</b> ${escapeHtml(alert.post_text)}</div>`
+                              : ""
+                          }
+                        </div>
+                        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:4px;">
+                          <span style="color:var(--dim);font-size:0.68rem;text-transform:uppercase;font-weight:600;">Matched triggers:</span>
+                          ${(alert.matched_phrases || [])
+                            .map((p) => `<span class="tag" style="background:rgba(255,77,94,0.15);border-color:var(--danger);color:#ff9da6;">${escapeHtml(p)}</span>`)
+                            .join("")}
+                        </div>
+                      </div>`,
+                    )
+                    .join("")}
+                </div>
+              </div>
+            `;
+          } else if (node.coordinated || node.label === "adversarial") {
+            const topFeat = Object.entries(node.top_features || node.features || {})
+              .filter(([, v]) => Math.abs(Number(v)) > 0)
+              .slice(0, 6);
+            flagReasonMarkup = `
+              <div class="why-flagged-section coordination">
+                <div class="why-flagged-header">
+                  <span>⚠️ Why this account was flagged: Structural & Behavioral Coordination</span>
+                </div>
+                <p class="why-flagged-desc">
+                  This account did not post lexical prompt injection strings, but was flagged due to abnormal synchronized interaction patterns, amplification rings, or template repetition with other cluster accounts.
+                </p>
+                ${
+                  topFeat.length
+                    ? `
+                  <div class="feature-chips">
+                    ${topFeat.map(([k, v]) => `<span class="feature-chip">${escapeHtml(k.replace(/_/g, " "))}: <b>${Number(v).toFixed(2)}</b></span>`).join("")}
+                  </div>`
+                    : ""
+                }
+              </div>
+            `;
+          } else {
+            flagReasonMarkup = `
+              <div class="why-flagged-section clean">
+                <div class="why-flagged-header">
+                  <span>✓ Account Status: Clean / Organic</span>
+                </div>
+                <p class="why-flagged-desc" style="margin-bottom:0;">
+                  No prompt injection payloads, adversarial instructions, or abnormal graph coordination were detected for this account. Posts and interaction timing appear natural and organic.
+                </p>
+              </div>
+            `;
+          }
+
+          let otherPostsMarkup = "";
+          if (userPosts.length > 0) {
+            const normalPosts = userPosts.filter(
+              (p) => !userAlerts.some((a) => a.post_index === p.post_index || (a.sentence && p.text && p.text.includes(a.sentence))),
+            );
+            if (normalPosts.length > 0) {
+              otherPostsMarkup = `
+                <div style="margin-top:6px;">
+                  <div style="font-size:0.73rem;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">
+                    Other posts from this account (${normalPosts.length})
+                  </div>
+                  <div class="flagged-posts-list">
+                    ${normalPosts.slice(0, 4).map((p, idx) => `
+                      <div class="account-post-item">
+                        <div class="account-post-meta">
+                          <span class="pill ok">Post #${(p.post_index ?? idx) + 1}</span>
+                          <span style="color:var(--dim);font-size:0.7rem;">Normal / Unflagged</span>
+                        </div>
+                        <div class="account-post-body">
+                          ${escapeHtml(p.text || "")}
+                        </div>
+                      </div>
+                    `).join("")}
+                  </div>
+                </div>
+              `;
+            }
+          }
+
+          inspector.innerHTML = `
+            <div class="inspector-head">
+              <div class="inspector-account-id">
+                <span class="inspector-account-name">@${escapeHtml(node.screen_name || node.user_id)}</span>
+                <span class="pill ${statusClass}">${statusText}</span>
+                <span class="pill">Cluster C${Number(node.cluster_id || 0)}</span>
+              </div>
+              <button class="inspector-close-btn" onclick="selectAccount(null)" title="Deselect account">✕ Close account detail</button>
+            </div>
+            <div class="inspector-body">
+              <div class="inspector-stats-row">
+                <div class="stat-card">
+                  <div class="stat-card-label">Evidence Score</div>
+                  <div class="stat-card-val" style="color:${toneFor(node.evidence_score || 0) === "bad" ? "var(--danger)" : toneFor(node.evidence_score || 0) === "warn" ? "var(--amber)" : "var(--cyan)"}">
+                    ${percent(node.evidence_score || 0)}
+                  </div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-card-label">Model Probability</div>
+                  <div class="stat-card-val">${percent(node.score || 0)}</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-card-label">Flagged Posts</div>
+                  <div class="stat-card-val" style="color:${userAlerts.length ? "var(--danger)" : "var(--good)"}">
+                    ${userAlerts.length}
+                  </div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-card-label">Cluster Size</div>
+                  <div class="stat-card-val">${node.cluster_size || "—"}</div>
+                </div>
+              </div>
+              ${flagReasonMarkup}
+              ${otherPostsMarkup}
+            </div>
+          `;
+          inspector.style.display = "block";
+        }
+
+        function selectAccount(nodeId, event = null) {
+          if (applyGraphSelection) {
+            applyGraphSelection(nodeId, event);
+          } else {
+            selectedNodeId = nodeId;
+            renderAccountInspector(nodeId);
+            syncPayloadFilterWithAccount(nodeId);
+            document.querySelectorAll("#account-table tbody tr").forEach((row) => {
+              row.classList.toggle("selected", row.dataset.userId === nodeId);
+            });
+          }
+          if (nodeId) {
+            const inspector = el("account-inspector");
+            if (inspector && inspector.style.display !== "none") {
+              inspector.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            }
+          }
+        }
+        window.selectAccount = selectAccount;
+        window.setPayloadAccountFilter = setPayloadAccountFilter;
+
         function renderNetworkBreakdown(network) {
+          currentNetworkReport = network;
+          renderArchitectureBanner(network);
           if (!network) {
             el("network-metrics").innerHTML =
               '<div class="empty">Submit a handle or activity log to measure coordination.</div>';
             el("account-table").innerHTML =
               '<div class="empty">Account-level scores appear after a network analysis.</div>';
             el("account-count").textContent = "";
+            renderAccountInspector(null);
             drawGraph({ nodes: [], edges: [], suspicious: [] });
             return;
           }
@@ -1970,6 +3127,17 @@
 
           const nodes = network.nodes || [];
           el("account-count").textContent = `${nodes.length} accounts`;
+
+          const alertsByUser = new Map();
+          (currentTextReport?.payload_alerts || []).forEach((alert) => {
+            if (alert.user_id) {
+              alertsByUser.set(
+                alert.user_id,
+                (alertsByUser.get(alert.user_id) || []).concat(alert),
+              );
+            }
+          });
+
           el("account-table").innerHTML = `
             <table>
               <thead>
@@ -1979,20 +3147,23 @@
                   <th>Status</th>
                   <th class="num">Evidence</th>
                   <th class="num">${network.model_trusted ? "Model score" : "Model ref."}</th>
-                  <th>Strongest features</th>
+                  <th>Flagged reasons / features</th>
                 </tr>
               </thead>
               <tbody>
                 ${[...nodes]
                   .sort((a, b) => b.evidence_score - a.evidence_score)
                   .map((node) => {
+                    const userAlerts = alertsByUser.get(node.user_id) || [];
                     const status = node.is_target
                       ? '<span class="pill target">target</span>'
-                      : node.coordinated
-                        ? '<span class="pill bad">coordinated</span>'
-                        : node.label === "adversarial"
-                          ? '<span class="pill bad">flagged</span>'
-                          : '<span class="pill ok">clear</span>';
+                      : userAlerts.length
+                        ? '<span class="pill bad">⚠️ flagged post</span>'
+                        : node.coordinated
+                          ? '<span class="pill bad">coordinated</span>'
+                          : node.label === "adversarial"
+                            ? '<span class="pill bad">flagged</span>'
+                            : '<span class="pill ok">clear</span>';
                     const features = Object.entries(node.top_features || {})
                       .slice(0, 3)
                       .map(
@@ -2000,19 +3171,35 @@
                           `${key.replace(/_/g, " ")} ${Number(value).toFixed(2)}`,
                       )
                       .join(", ");
+                    const reasonSnippet = userAlerts.length
+                      ? `<b style="color:var(--danger)">${userAlerts.length} malicious post payload(s)</b> · ${escapeHtml(features)}`
+                      : escapeHtml(features);
                     return `
-                      <tr class="${node.coordinated ? "flagged" : ""}" data-user-id="${escapeHtml(node.user_id)}">
-                        <td>${escapeHtml(node.screen_name || node.user_id)}</td>
+                      <tr class="${node.coordinated || userAlerts.length ? "flagged" : ""}" data-user-id="${escapeHtml(node.user_id)}" title="Click to inspect this account and view why it was flagged">
+                        <td><b>${escapeHtml(node.screen_name || node.user_id)}</b></td>
                         <td><span class="pill">C${Number(node.cluster_id || 0)}</span></td>
                         <td>${status}</td>
                         <td class="num">${percent(node.evidence_score)}</td>
                         <td class="num">${percent(node.score)}</td>
-                        <td style="color: var(--dim)">${escapeHtml(features)}</td>
+                        <td style="color: var(--dim)">${reasonSnippet}</td>
                       </tr>`;
                   })
                   .join("")}
               </tbody>
             </table>`;
+
+          el("account-table")
+            .querySelectorAll("tbody tr")
+            .forEach((row) => {
+              row.addEventListener("click", () => {
+                const uid = row.dataset.userId;
+                if (selectedNodeId === uid) {
+                  selectAccount(null);
+                } else {
+                  selectAccount(uid);
+                }
+              });
+            });
 
           drawGraph({
             nodes,
@@ -2020,8 +3207,14 @@
             suspicious: network.suspicious_edges || [],
             clusters: network.clusters || [],
             model_trusted: network.model_trusted,
+            network_architecture: network.network_architecture,
           });
+
+          if (selectedNodeId) {
+            renderAccountInspector(selectedNodeId);
+          }
         }
+
 
         // -------------------------------------------------------------- graph
         function drawGraph(data) {
@@ -2058,6 +3251,7 @@
           el("graph").dataset.largeGraph = String(isLargeGraph);
 
           if (!data.nodes.length) {
+            applyGraphSelection = null;
             tooltip.classList.remove("visible");
             legend.innerHTML =
               '<span><i style="background: var(--cyan)"></i>Communities appear after analysis</span>';
@@ -2079,8 +3273,18 @@
           const clusterIds = [
             ...new Set(nodes.map((node) => Number(node.cluster_id || 0))),
           ].sort((a, b) => a - b);
+
+          const isDecentralized =
+            data.network_architecture === "decentralized_federated" ||
+            nodes.some(
+              (n) =>
+                n.instance_domain &&
+                n.instance_domain !== "x.com" &&
+                n.instance_domain !== "instagram.com",
+            );
+
           legend.innerHTML = [
-            ...clusterIds.slice(0, 12).map(
+            ...clusterIds.slice(0, 10).map(
               (clusterId) =>
                 `<span><i class="cluster-swatch" style="background:${clusterColour(
                   clusterId,
@@ -2088,6 +3292,9 @@
             ),
             '<span><i class="line" style="background:var(--danger)"></i>Suspicious link</span>',
             '<span><i style="border:2px solid var(--danger);background:transparent"></i>Coordination evidence</span>',
+            isDecentralized
+              ? '<span><i class="line" style="background:#ff4d5e;border-top:2px dashed #ff4d5e"></i>Cross-instance bridge</span><span><i style="background:rgba(167,139,250,0.25);border:1px dashed #a78bfa"></i>Federated instance hull</span>'
+              : '<span><i style="border:1.5px dashed var(--cyan);border-radius:50%;width:12px;height:12px;display:inline-block;"></i>Central radial core</span>',
           ].join("");
           const known = new Set(nodes.map((node) => node.id));
           const links = (data.edges || [])
@@ -2095,6 +3302,7 @@
             .map((edge) => ({
               ...edge,
               suspicious: suspicious.has(`${edge.source}->${edge.target}`),
+              is_cross_instance: Boolean(edge.is_cross_instance),
             }));
 
           const categoryFor = (item) =>
@@ -2141,19 +3349,28 @@
               .on("zoom", (event) => container.attr("transform", event.transform)),
           );
 
-          const link = container
-            .append("g")
+          const hullsGroup = container.append("g").attr("class", "instance-hulls-layer");
+          const ringsGroup = container.append("g").attr("class", "radial-rings-layer");
+          const linksGroup = container.append("g").attr("class", "links-layer");
+          const nodesGroup = container.append("g").attr("class", "nodes-layer");
+
+          const link = linksGroup
             .selectAll("line")
             .data(links)
             .join("line")
-            .attr("class", (d) => `link ${d.suspicious ? "suspicious" : ""}`);
+            .attr(
+              "class",
+              (d) =>
+                `link ${d.suspicious ? "suspicious" : ""} ${
+                  d.is_cross_instance ? "cross-instance" : ""
+                }`,
+            );
 
           if (!isLargeGraph) {
             link.append("title").text((d) => `${d.source} → ${d.target} (${d.relation})`);
           }
 
-          const node = container
-            .append("g")
+          const node = nodesGroup
             .selectAll("g")
             .data(nodes)
             .join("g")
@@ -2289,6 +3506,7 @@
               </div>
               <div class="tags">
                 <span class="tag neutral">${d.coordinated ? "coordination evidence" : "no coordination evidence"}</span>
+                ${d.instance_domain ? `<span class="tag neutral" style="color:#c4b5fd;border-color:rgba(167,139,250,0.4)">@${escapeHtml(d.instance_domain)}</span>` : ""}
                 ${d.ground_truth ? `<span class="tag neutral">research label: ${escapeHtml(d.ground_truth)}</span>` : ""}
                 ${d.verified ? '<span class="tag neutral">verified</span>' : ""}
               </div>
@@ -2361,6 +3579,8 @@
 
           const applySelection = (nodeId, event = null) => {
             selectedNodeId = nodeId;
+            renderAccountInspector(nodeId);
+            syncPayloadFilterWithAccount(nodeId);
             node
               .classed("selected", (item) => item.id === nodeId)
               .attr("aria-selected", (item) => String(item.id === nodeId));
@@ -2380,15 +3600,17 @@
               row.classList.toggle("selected", selected);
               if (selected) row.scrollIntoView({ block: "nearest" });
             });
-            if (!nodeId) {
+            if (!nodeId || !event) {
               tooltip.classList.remove("visible");
               tooltip.innerHTML = "";
-              return;
+              if (!nodeId) return;
+            } else {
+              tooltip.innerHTML = tooltipMarkup(nodesById.get(nodeId));
+              tooltip.classList.add("visible");
+              positionTooltip(event);
             }
-            tooltip.innerHTML = tooltipMarkup(nodesById.get(nodeId));
-            tooltip.classList.add("visible");
-            if (event) positionTooltip(event);
           };
+          applyGraphSelection = applySelection;
           clearGraphSelection = () => applySelection(null);
           svg.on("click.selection", () => applySelection(null));
           node
@@ -2460,6 +3682,80 @@
                 .attr("x2", (d) => d.target.x)
                 .attr("y2", (d) => d.target.y);
               node.attr("transform", (d) => `translate(${d.x},${d.y})`);
+
+              if (isDecentralized) {
+                ringsGroup.selectAll("*").remove();
+                const domains = Array.from(
+                  new Set(nodes.map((n) => n.instance_domain || "x.com")),
+                );
+                const hullData = [];
+                domains.forEach((domain) => {
+                  const groupNodes = nodes.filter(
+                    (n) => (n.instance_domain || "x.com") === domain && n.x != null && n.y != null,
+                  );
+                  if (!groupNodes.length) return;
+                  const pad = 24;
+                  const points = [];
+                  groupNodes.forEach((n) => {
+                    points.push([n.x - pad, n.y - pad]);
+                    points.push([n.x + pad, n.y - pad]);
+                    points.push([n.x + pad, n.y + pad]);
+                    points.push([n.x - pad, n.y + pad]);
+                  });
+                  const hull = d3.polygonHull(points);
+                  if (hull) {
+                    const [cx, cy] = d3.polygonCentroid(hull);
+                    hullData.push({ domain, hull, cx, cy });
+                  }
+                });
+
+                hullsGroup
+                  .selectAll("path.instance-hull")
+                  .data(hullData, (d) => d.domain)
+                  .join("path")
+                  .attr("class", "instance-hull")
+                  .attr("stroke", (d) =>
+                    d.domain.includes("malicious") || d.domain.includes("rogue")
+                      ? "var(--danger)"
+                      : "#a78bfa",
+                  )
+                  .attr("fill", (d) =>
+                    d.domain.includes("malicious") || d.domain.includes("rogue")
+                      ? "var(--danger)"
+                      : "#a78bfa",
+                  )
+                  .attr("d", (d) => `M${d.hull.join("L")}Z`);
+
+                hullsGroup
+                  .selectAll("text.instance-label")
+                  .data(hullData, (d) => d.domain)
+                  .join("text")
+                  .attr("class", "instance-label")
+                  .attr("text-anchor", "middle")
+                  .attr("x", (d) => d.cx)
+                  .attr("y", (d) => d.cy - 12)
+                  .text((d) => `@${d.domain}`);
+              } else {
+                hullsGroup.selectAll("*").remove();
+                const centerNode =
+                  target ||
+                  nodes.reduce(
+                    (max, n) =>
+                      (n.features?.in_degree || 0) > (max?.features?.in_degree || 0) ? n : max,
+                    nodes[0],
+                  );
+                if (centerNode && centerNode.x != null && centerNode.y != null) {
+                  const ringRadii = [48, 102, 162];
+                  ringsGroup
+                    .selectAll("circle.radial-ring")
+                    .data(ringRadii)
+                    .join("circle")
+                    .attr("class", "radial-ring")
+                    .attr("cx", centerNode.x)
+                    .attr("cy", centerNode.y)
+                    .attr("r", (d) => d);
+                }
+              }
             });
 
           if (!reduceMotion && !isLargeGraph) {
@@ -2612,6 +3908,9 @@
           button.innerHTML = '<span class="spinner"></span>Analyzing…';
           showError("");
           showNotice("");
+          selectedNodeId = null;
+          activePayloadAccountFilter = null;
+          renderAccountInspector(null);
 
           try {
             if (mode === "handle") {
@@ -2630,6 +3929,16 @@
                   source: `uploaded account feed: ${feedAccount.account_handle}`,
                 });
                 const risk = report.risk_score ?? report.peak_score;
+                currentAllPosts = (feedAccount.recent_posts || []).map((text, idx) => ({
+                  user_id: feedAccount.account_handle,
+                  text: String(text),
+                  post_index: idx,
+                }));
+                (report.payload_alerts || []).forEach((alert) => {
+                  alert.user_id = feedAccount.account_handle;
+                  const p = currentAllPosts[alert.post_index];
+                  if (p) alert.post_text = p.text;
+                });
                 renderVerdict({
                   label: risk >= 0.5 ? "simple_spambot" : "human",
                   score: risk,
@@ -2656,6 +3965,20 @@
                   handle,
                   peers: Number(el("peers").value),
                 });
+                currentAllPosts = (report.text?.posts || []).map((p, idx) => ({
+                  user_id: p.user_id || report.handle,
+                  text: p.text,
+                  post_index: p.post_index ?? idx,
+                  score: p.score,
+                  label: p.label,
+                }));
+                (report.text?.payload_alerts || []).forEach((alert) => {
+                  const p = currentAllPosts[alert.post_index];
+                  if (p) {
+                    if (!alert.user_id) alert.user_id = p.user_id;
+                    alert.post_text = p.text;
+                  }
+                });
                 renderVerdict({
                   label: report.classification,
                   score: report.threat_score,
@@ -2679,6 +4002,18 @@
                 source: "console",
               });
               const risk = report.risk_score ?? report.peak_score;
+              (report.payload_alerts || []).forEach((a) => {
+                if (!a.user_id) a.user_id = "thread_author";
+              });
+              currentAllPosts = (report.posts || []).map((p, idx) => ({
+                user_id: p.user_id || "thread_author",
+                text: p.text,
+                post_index: p.post_index ?? idx,
+              }));
+              (report.payload_alerts || []).forEach((alert) => {
+                const p = currentAllPosts[alert.post_index];
+                if (p) alert.post_text = p.text;
+              });
               renderVerdict({
                 label: risk >= 0.5 ? "simple_spambot" : "human",
                 score: risk,
@@ -2746,9 +4081,24 @@
                 // thread endpoint only knows post order.
                 thread.payload_alerts.forEach((alert) => {
                   const post = uploadedTextPosts[alert.post_index];
-                  if (post) alert.user_id = post.user_id;
+                  if (post) {
+                    alert.user_id = post.user_id;
+                    alert.post_text = post.text;
+                  }
                 });
+                if (thread.posts) {
+                  thread.posts.forEach((tp) => {
+                    const post = uploadedTextPosts[tp.post_index];
+                    if (post) tp.user_id = post.user_id;
+                  });
+                }
               }
+
+              currentAllPosts = uploadedPosts.map((p, idx) => ({
+                user_id: p.user_id,
+                text: p.text,
+                post_index: idx,
+              }));
 
               const score = Math.max(
                 report.aggregate_score,
@@ -2778,6 +4128,76 @@
         el("run").addEventListener("click", run);
         el("handle").addEventListener("keydown", (event) => {
           if (event.key === "Enter") run();
+        });
+
+        // ----------------------- Architecture Presets & Comparison Drawer
+        let cachedPresets = null;
+
+        async function loadPresetFixture(fixtureId) {
+          const button = el("run");
+          try {
+            showNotice(`Loading benchmark fixture: ${fixtureId}…`);
+            button.disabled = true;
+            button.innerHTML = '<span class="spinner"></span>Loading fixture…';
+
+            if (!cachedPresets) {
+              cachedPresets = await callApi("/architecture_presets");
+            }
+            const preset = Array.isArray(cachedPresets)
+              ? cachedPresets.find((p) => p.id === fixtureId)
+              : cachedPresets[fixtureId];
+            if (!preset) {
+              throw new Error(`Fixture ${fixtureId} not found in presets`);
+            }
+
+            uploaded = {
+              nodes: preset.nodes || [],
+              edges: preset.edges || [],
+              posts: preset.posts || [],
+            };
+            validatePayload(uploaded);
+            accountFeed = [];
+            currentAllPosts = [];
+
+            el("file-name").textContent = `${preset.id}.json`;
+            el("file-meta").textContent = `${uploaded.nodes.length} accounts · ${
+              (uploaded.edges || []).length
+            } edges · ${(uploaded.posts || []).length} posts · ${preset.name}`;
+
+            selectMode("upload");
+            showNotice(
+              `Loaded benchmark: ${preset.name} (${preset.attack_mode}). Analyzing threat profile…`,
+            );
+            await run();
+          } catch (err) {
+            showError(err.message);
+          } finally {
+            button.disabled = false;
+            button.textContent = "Run threat analysis";
+          }
+        }
+
+        document.querySelectorAll(".preset-btn[data-fixture]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            loadPresetFixture(btn.dataset.fixture);
+          });
+        });
+
+        const compareDrawer = el("compare-drawer");
+        el("btn-open-compare")?.addEventListener("click", () => {
+          if (compareDrawer) {
+            const isClosed = compareDrawer.style.display === "none";
+            compareDrawer.style.display = isClosed ? "block" : "none";
+            if (isClosed) {
+              compareDrawer.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+          }
+        });
+
+        el("btn-close-compare")?.addEventListener("click", () => {
+          if (compareDrawer) {
+            compareDrawer.style.display = "none";
+          }
         });
 
         // ---------------------------------------------------------- bootstrap

@@ -2012,7 +2012,7 @@ Phase 1 now passes end-to-end in the supported environment: ingestion, lightweig
 
 <sub>tools: ApplyPatch: *** Begin Patch
 *** Add File: C:\Users\dabhi\Documents\Major-Project\Complete-project\backend\__init__.py
-+"""AEGIS-SN FastAPI backend."""
++"""AgentInTheShell FastAPI backend."""
 *** End Patch
 </sub>
 
@@ -2034,7 +2034,7 @@ Phase 1 now passes end-to-end in the supported environment: ingestion, lightweig
 
 <sub>tools: ApplyPatch: *** Begin Patch
 *** Add File: C:\Users\dabhi\Documents\Major-Project\Complete-project\backend\routes.py
-+"""HTTP routes for AEGIS-SN inference and analyst dashb</sub>
++"""HTTP routes for AgentInTheShell inference and analyst dashb</sub>
 
 
 <sub>tools: ApplyPatch: *** Begin Patch
@@ -2053,7 +2053,7 @@ Phase 1 now passes end-to-end in the supported environment: ingestion, lightweig
 
 <sub>tools: ApplyPatch: *** Begin Patch
 *** Add File: C:\Users\dabhi\Documents\Major-Project\Complete-project\backend\README.md
-+# AEGIS-SN backend
++# AgentInTheShell backend
 +
 +Run from the repository root:
 +
@@ -2468,7 +2468,7 @@ The initial build caught a Vite parsing mismatch: the requested `App.js` contain
 
 <sub>tools: ApplyPatch: *** Begin Patch
 *** Add File: C:\Users\dabhi\Documents\Major-Project\Complete-project\README.md
-+# AEGIS-SN
++# AgentInTheShell
 +
 +Hybrid NLP and graph-neural-network detection of </sub>
 
@@ -2843,7 +2843,7 @@ Also remove all files nd folders at the end which is empty and not required or u
 **Assistant:**
 
 
-I’ll replace the current React/Vite frontend with one self-contained `index.html`, keep the AEGIS-SN project identity, add the Three.js/GSAP experience, then remove the superseded frontend files and verify the page.
+I’ll replace the current React/Vite frontend with one self-contained `index.html`, keep the AgentInTheShell project identity, add the Three.js/GSAP experience, then remove the superseded frontend files and verify the page.
 
 **Evaluating frontend rewrite**
 
@@ -3852,7 +3852,7 @@ Both services are up right now — the API answers on `http://127.0.0.1:8000/hea
 **You:**
 
 
-what is AEGIS-SN
+what is AgentInTheShell
 
 
 <sub>tools: Grep: C:\Users\dabhi\Documents\Major-Project\Complete-project</sub>
@@ -3861,7 +3861,7 @@ what is AEGIS-SN
 **Assistant:**
 
 
-AEGIS-SN is the name of this project — the system we've been building. It stands for **Adversarial agEntic Graph & Inference System for Social Networks**, defined in `ml/src/aegis/__init__.py` and `requirements.txt`.
+AgentInTheShell is the name of this project — the system we've been building. It stands for **Adversarial agEntic Graph & Inference System for Social Networks**, defined in `ml/src/aegis/__init__.py` and `requirements.txt`.
 
 It's your major project: *"Identification and classification of adversarial agentic AI behaviours in centralized and decentralized social networks."* The problem it addresses is that AI-driven manipulation on social platforms has two halves that single-model detectors miss when taken alone. One account posting LLM-generated text isn't necessarily malicious, and one account retweeting another isn't either — but a group of accounts posting near-identical scripted text within seconds of each other, while amplifying only each other, is a coordinated campaign.
 
@@ -4153,7 +4153,7 @@ I need to update my to-do list and double-check the syntax using the browser and
 
 I'm noticing a potential bug where dragging a node immediately unpins it on the end event, while a click might toggle pinned status based on null sets. There's also an issue with appending the title to the line selection. I'm checking that the first script runs matchMedia before the load, and I need to ensure `color-mix` is supported. I must correct the typo in "Advenstrail" to "adversarial" in the index text. 
 
-Additionally, I'm considering renaming the README and updating the backend title to reflect the website being the focus, maybe to "AgentInTheShell API" while keeping the internal project name, AEGIS-SN. I’ll need to test and update my to-do list as well!
+Additionally, I'm considering renaming the README and updating the backend title to reflect the website being the focus, maybe to "AgentInTheShell API" while keeping the internal project name, AgentInTheShell. I’ll need to test and update my to-do list as well!
 
 
 <sub>tools: TodoWrite: ; GetDynamicTools: ; Shell: Ensure frontend server is available; Shell: Run backend regression tests</sub>
@@ -4279,7 +4279,7 @@ I think the current project looks nice! However, I feel that it might need a pat
 <sub>tools: ApplyPatch: *** Begin Patch
 *** Update File: C:\Users\dabhi\Documents\Major-Project\Complete-project\README.md
 @@
--# AEGIS-SN
+-# AgentInTheShell
 +# AgentInTheShell
  
 -Hybrid NLP and graph-neu</sub>
@@ -4484,7 +4484,7 @@ Briefly inform the user about the task result and perform any follow-up actions 
 **You:**
 
 
-what is AEGIS-SN
+what is AgentInTheShell
 
 
 ---
@@ -4665,7 +4665,7 @@ Currently, the backend _load_network loads graph metrics like RF, scaler, and GN
 
 <sub>tools: ApplyPatch: *** Begin Patch
 *** Add File: C:\Users\dabhi\Documents\Major-Project\Complete-project\docs\PROJECT_DOCUMENTATION.md
-+# AgentInTheShell / AEGIS-SN — Complete Pro</sub>
++# AgentInTheShell / AgentInTheShell — Complete Pro</sub>
 
 
 **Assistant:**
@@ -4707,7 +4707,7 @@ I need to update the backend README because it’s outdated. I should add a link
 <sub>tools: ApplyPatch: *** Begin Patch
 *** Update File: C:\Users\dabhi\Documents\Major-Project\Complete-project\backend\README.md
 @@
--# AEGIS-SN backend
+-# AgentInTheShell backend
 +# AgentInTheShell API
 @@
  End</sub>
@@ -4724,7 +4724,7 @@ I'm noticing that there’s a README link for the root docs, but it doesn't seem
 <sub>tools: ApplyPatch: *** Begin Patch
 *** Update File: C:\Users\dabhi\Documents\Major-Project\Complete-project\README.md
 @@
- The web experience for AEGIS-SN: hybrid NLP and graph-neu</sub>
+ The web experience for AgentInTheShell: hybrid NLP and graph-neu</sub>
 
 
 **Assistant:**

@@ -23,7 +23,7 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(
-    title="AEGIS-SN Threat Detection API",
+    title="AgentInTheShell Threat Detection API",
     description=(
         "Hybrid text and network analysis for adversarial agentic behavior "
         "in social networks."

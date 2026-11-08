@@ -7,7 +7,7 @@
 #       format_version: '1.3'
 #       jupytext_version: 1.19.5
 #   kernelspec:
-#     display_name: Python 3 (AEGIS-SN)
+#     display_name: Python 3 (AgentInTheShell)
 #     language: python
 #     name: python3
 # ---
@@ -15,7 +15,7 @@
 # %% [markdown]
 # # 02 · Text Branch — Fine-tuning DeBERTa-v3
 #
-# **AEGIS-SN** — the NLP half of the hybrid detector.
+# **AgentInTheShell** — the NLP half of the hybrid detector.
 #
 # Binary target: **0 = human / benign**, **1 = machine-generated *or* adversarial**.
 #

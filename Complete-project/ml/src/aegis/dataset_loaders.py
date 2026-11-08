@@ -85,10 +85,11 @@ TEXT_SCHEMA: Tuple[str, ...] = (
 NODE_SCHEMA: Tuple[str, ...] = (
     "user_id", "label", "screen_name", "followers_count", "following_count",
     "statuses_count", "account_age_days", "verified", "description", "split",
-    "campaign_id", "source_dataset", "scenario",
+    "campaign_id", "source_dataset", "scenario", "instance_domain",
 )
 EDGE_SCHEMA: Tuple[str, ...] = (
     "source", "target", "relation", "campaign_id", "source_dataset", "scenario",
+    "is_cross_instance",
 )
 POST_SCHEMA: Tuple[str, ...] = (
     "post_id", "user_id", "text", "created_at", "hashtags", "mentions",
@@ -234,9 +235,26 @@ def _finalise_graph(
     )
     nodes["screen_name"] = nodes["screen_name"].fillna(nodes["user_id"])
     nodes["description"] = nodes["description"].fillna("")
+
+    # Automatically infer instance_domain if missing
+    def _infer_domain(val: Any, handle: Any) -> str:
+        if val is not None and str(val).strip() and str(val) not in ("None", "nan"):
+            return str(val).strip()
+        h = str(handle or "").strip()
+        if "@" in h:
+            parts = [p for p in h.split("@") if p]
+            if len(parts) >= 2:
+                return parts[-1]
+        return "x.com"
+
+    nodes["instance_domain"] = [
+        _infer_domain(d, s)
+        for d, s in zip(nodes["instance_domain"], nodes["screen_name"])
+    ]
     nodes = nodes.loc[:, list(NODE_SCHEMA)].reset_index(drop=True)
 
     known = set(nodes["user_id"])
+    node_domains = dict(zip(nodes["user_id"], nodes["instance_domain"]))
 
     edges = edges.copy()
     for column in EDGE_SCHEMA:
@@ -253,6 +271,16 @@ def _finalise_graph(
     edges = edges.drop_duplicates(subset=["source", "target", "relation"])
     if before != len(edges):
         log.debug("graph: pruned %d dangling/self/dup edges", before - len(edges))
+
+    def _is_cross(val: Any, src: str, dst: str) -> bool:
+        if val is not None and not pd.isna(val):
+            return bool(val)
+        return node_domains.get(src, "x.com") != node_domains.get(dst, "x.com")
+
+    edges["is_cross_instance"] = [
+        _is_cross(v, s, t)
+        for v, s, t in zip(edges["is_cross_instance"], edges["source"], edges["target"])
+    ]
     edges = edges.loc[:, list(EDGE_SCHEMA)].reset_index(drop=True)
 
     posts = posts.copy()

@@ -1,7 +1,7 @@
-# AEGIS-SN Complete Technical Reference
+# AgentInTheShell Complete Technical Reference
 
 This document is the detailed engineering and research reference for
-**AEGIS-SN / AgentInTheShell**. Start with the repository
+**AgentInTheShell**. Start with the repository
 [`README.md`](../README.md) for installation and the full project overview.
 
 ## 1. Truth standard
@@ -700,7 +700,7 @@ Exclude:
 Suggested review instruction:
 
 ```text
-Audit AEGIS-SN against README.md, docs/PROJECT_DOCUMENTATION.md,
+Audit AgentInTheShell against README.md, docs/PROJECT_DOCUMENTATION.md,
 docs/DATASETS_AND_PROVENANCE.md, docs/API_REFERENCE.md, and
 docs/GENERALIZATION_RUNBOOK.md. Treat generated campaign data as simulation,
 historical metrics as stale until rerun, and validate claims directly against

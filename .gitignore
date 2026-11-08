@@ -83,3 +83,5 @@ logs/
 wandb/
 mlruns/
 lightning_logs/
+graphify-out/
+Complete-project/data/external/

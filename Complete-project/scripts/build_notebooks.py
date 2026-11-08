@@ -41,7 +41,7 @@ CELL_MARKER = "# %%"
 MARKDOWN_MARKER = "# %% [markdown]"
 
 KERNELSPEC = {
-    "display_name": "Python 3 (AEGIS-SN)",
+    "display_name": "Python 3 (AgentInTheShell)",
     "language": "python",
     "name": "python3",
 }

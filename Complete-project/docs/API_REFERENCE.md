@@ -1,4 +1,4 @@
-# AEGIS-SN API Reference
+# AgentInTheShell API Reference
 
 Base URL for local development:
 
@@ -24,7 +24,7 @@ Response:
 ```json
 {
   "status": "ok",
-  "service": "aegis-sn"
+  "service": "AgentInTheShell"
 }
 ```
 
@@ -202,14 +202,15 @@ Scores an account interaction network.
 | `crawl_era` | string/null | no | Dataset-era display. |
 | `cluster_id` | integer/null | no | Supplied display community. |
 | `community_id` | string/null | no | Source community label. |
+| `instance_domain` | string/null | no | Home platform/pod domain (e.g. `x.com`, `mastodon.social`). |
 
 ### Edge fields
 
 ```text
-source, target, relation
+source, target, relation, is_cross_instance?
 ```
 
-Each endpoint must match a supplied node.
+Each endpoint must match a supplied node. `is_cross_instance` marks edges between distinct home domains.
 
 ### Post fields
 
@@ -233,6 +234,10 @@ The network report includes:
 - `model` and `model_trusted`;
 - `threshold`, `aggregate_score`, and `score_components`;
 - `classification`, `band`, and human-readable `reasons`;
+- `network_architecture` (`centralized` or `decentralized_federated`);
+- `architecture_confidence` (0.0–1.0);
+- `architecture_attack_profile` (specific threat mode);
+- `instance_entropy`, `cross_instance_edge_ratio`, `hub_dominance_gini`, `federation_bridge_centrality`;
 - counts of flagged/coordinated nodes and clusters;
 - global coordination metrics;
 - per-node model/evidence scores, features, metadata, and cluster;
@@ -319,6 +324,17 @@ Response shape:
   ]
 }
 ```
+
+## GET `/architecture_presets`
+
+Returns the 4 canonical benchmark testing fixtures for centralized and decentralized network architectures:
+
+1. `centralized_x_hashtag_flood` (Algorithmic Trend Gaming, single-platform namespace)
+2. `centralized_ig_shill_ring` (Hub-and-spoke commercial astroturfing)
+3. `decentralized_mastodon_bridge_attack` (ActivityPub multi-instance bridge attack)
+4. `decentralized_a2a_protocol_spoof` (Agent-to-Agent discovery spoofing & token injection)
+
+Each returned preset includes `id`, `name`, `architecture`, `attack_mode`, `metadata`, `nodes`, `edges`, and `posts`, ready for immediate input to `/analyze_network`.
 
 ## Error behaviour
 

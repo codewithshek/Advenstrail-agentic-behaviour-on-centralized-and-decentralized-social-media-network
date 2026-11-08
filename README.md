@@ -1,12 +1,12 @@
-# AEGIS-SN / AgentInTheShell
+# AgentInTheShell
 
 > **Identification and classification of adversarial agentic AI behaviours in
 > centralized and decentralized social networks**
 
-AEGIS-SN is a research and engineering system for detecting adversarial
+AgentInTheShell is a research and engineering system for detecting adversarial
 autonomous agents that operate through social-network content and coordinated
-account behaviour. The product interface is called **AgentInTheShell**. It
-combines a DeBERTa-v3 language classifier, an inductive GraphSAGE coordination
+account behaviour. The analyst interface is provided via the **AgentInTheShell**
+web console. It combines a DeBERTa-v3 language classifier, an inductive GraphSAGE coordination
 model, transparent evidence rules, a calibrated fusion layer, a FastAPI
 inference service, and an interactive analyst dashboard.
 
@@ -54,7 +54,7 @@ ordinary while the surrounding network reveals:
   federated or decentralized communities.
 
 Content-only systems miss structure. Graph-only systems can confuse dense
-organic communities with malicious campaigns. AEGIS-SN treats language and
+organic communities with malicious campaigns. AgentInTheShell treats language and
 coordination as complementary evidence.
 
 ### The hybrid solution
@@ -968,15 +968,15 @@ Before external deployment:
 ## Citation and project identity
 
 If you use this repository in academic work, cite the underlying datasets and
-models according to their original licenses/publications. AEGIS-SN does not
+models according to their original licenses/publications. AgentInTheShell does not
 redistribute governed corpora and does not claim authorship of those datasets.
 
 Suggested project citation:
 
 ```bibtex
-@software{aegis_sn,
-  title  = {AEGIS-SN: Identification and Classification of Adversarial
-            Agentic AI Behaviours in Social Networks},
+@software{agent_in_the_shell,
+  title  = {AgentInTheShell: Identification and Classification of Adversarial
+            Agentic AI Behaviours in Centralized and Decentralized Social Networks},
   note   = {Hybrid DeBERTa-v3, GraphSAGE, and campaign-isolated fusion
             research prototype},
   year   = {2026}

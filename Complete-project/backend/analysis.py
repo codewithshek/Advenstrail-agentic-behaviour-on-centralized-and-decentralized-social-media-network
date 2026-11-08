@@ -341,11 +341,93 @@ def triage_band(score: float) -> str:
     return "low"
 
 
+def detect_architecture_attack_profile(
+    *,
+    architecture: str,
+    metrics: dict[str, float],
+    posts: list[dict[str, Any]],
+    edges: list[dict[str, Any]],
+    payload_alerts: int = 0,
+    text_content: str = "",
+) -> str:
+    """
+    Classify detected adversarial behavior into architecture-specific threat modes:
+    - Centralized: Algorithmic Retweet Ring, Synchronized Hashtag Flood,
+      Central Hub Reply-Hijack, Direct Prompt Injection.
+    - Decentralized: Cross-Instance Sybil Bridge Attack, Federation Moderation Bypass,
+      A2A/MCP Protocol Discovery Spoof, Distributed Relay Prompt Injection.
+    """
+    text_lower = (
+        text_content.lower()
+        if text_content
+        else " ".join(str(p.get("text", "")).lower() for p in posts)
+    )
+
+    if architecture == "decentralized_federated":
+        # Check A2A / MCP tokens
+        if any(
+            tell in text_lower
+            for tell in (
+                "[a2a_discovery_spoof]",
+                "[mcp_token_hijack]",
+                "a2a discovery spoof",
+                "mcp token hijack",
+                "mcp tool-poisoning",
+                "forge agent card",
+                "agent card discovery",
+            )
+        ):
+            return "A2A/MCP Protocol Discovery Spoof"
+
+        # Check relay prompt injection
+        if any(
+            tell in text_lower
+            for tell in (
+                "cross-instance relay",
+                "relay prompt injection",
+                "distributed relay injection",
+                "forward instruction",
+            )
+        ) or payload_alerts > 0:
+            return "Distributed Relay Prompt Injection"
+
+        # Check defederation bypass
+        if "defederation" in text_lower or "defederate" in text_lower or "silencing" in text_lower:
+            return "Federation Moderation Bypass"
+
+        return "Cross-Instance Sybil Bridge Attack"
+
+    # Centralized architecture
+    if payload_alerts > 0 or any(
+        tell in text_lower
+        for tell in (
+            "ignore previous instructions",
+            "system prompt",
+            "jailbreak",
+            "developer mode",
+            "dan mode",
+        )
+    ):
+        return "Direct Prompt Injection"
+
+    hashtag_overlap = metrics.get("hashtag_overlap", 0.0)
+    peak_synchrony = metrics.get("peak_synchrony", 0.0)
+    if hashtag_overlap >= 0.35 or peak_synchrony >= 0.50:
+        return "Synchronized Hashtag Flood"
+
+    replies_count = sum(1 for e in edges if e.get("relation") == "replied_to")
+    if replies_count >= 5:
+        return "Central Hub Reply-Hijack"
+
+    return "Algorithmic Retweet Ring"
+
+
 __all__ = [
     "SUBJECT_LABELS",
     "classify_subject",
     "coordination_metrics",
     "coordination_participants",
+    "detect_architecture_attack_profile",
     "evidence_score",
     "graph_communities",
     "node_evidence_score",

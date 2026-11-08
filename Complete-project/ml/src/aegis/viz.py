@@ -120,7 +120,7 @@ def _pyplot():
 
 def set_style(*, force: bool = False) -> None:
     """
-    Apply the AEGIS-SN figure style. Idempotent, and called by every plot
+    Apply the AgentInTheShell figure style. Idempotent, and called by every plot
     function, so a notebook never has to remember to call it.
 
     rcParams are set explicitly rather than via ``plt.style.use("seaborn-...")``

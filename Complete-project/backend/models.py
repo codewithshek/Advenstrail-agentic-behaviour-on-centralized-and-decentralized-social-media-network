@@ -85,6 +85,7 @@ class ThreadPostResult(BaseModel):
     score: float = Field(ge=0.0, le=1.0)
     label: ThreatLabel
     payload_alerts: list[PayloadAlert] = Field(default_factory=list)
+    user_id: str | None = None
 
 
 class ThreadReport(BaseModel):
@@ -128,12 +129,14 @@ class NetworkNode(BaseModel):
     crawl_era: str | None = Field(default=None, max_length=100)
     cluster_id: int | None = Field(default=None, ge=0)
     community_id: str | None = Field(default=None, max_length=200)
+    instance_domain: str | None = Field(default=None, max_length=200)
 
 
 class NetworkEdge(BaseModel):
     source: str = Field(min_length=1, max_length=200)
     target: str = Field(min_length=1, max_length=200)
     relation: str = Field(default="interacts", min_length=1, max_length=100)
+    is_cross_instance: bool = False
 
 
 class NetworkPost(BaseModel):
@@ -201,6 +204,7 @@ class NodeThreat(BaseModel):
     cluster_id: int = Field(default=0, ge=0)
     community_label: str | None = None
     cluster_size: int = Field(default=1, ge=1)
+    instance_domain: str | None = None
 
 
 class ClusterSummary(BaseModel):
@@ -232,6 +236,7 @@ class GraphEdge(BaseModel):
     source: str
     target: str
     relation: str
+    is_cross_instance: bool = False
 
 
 class NetworkReport(BaseModel):
@@ -254,6 +259,13 @@ class NetworkReport(BaseModel):
     band: TriageBand
     reasons: list[str] = Field(default_factory=list)
     coordination: CoordinationMetrics
+    network_architecture: Literal["centralized", "decentralized_federated"] = "centralized"
+    architecture_confidence: float = Field(default=1.0, ge=0.0, le=1.0)
+    architecture_attack_profile: str = "Algorithmic Retweet Ring"
+    instance_entropy: float = Field(default=0.0, ge=0.0)
+    cross_instance_edge_ratio: float = Field(default=0.0, ge=0.0, le=1.0)
+    hub_dominance_gini: float = Field(default=0.0, ge=0.0, le=1.0)
+    federation_bridge_centrality: float = Field(default=0.0, ge=0.0, le=1.0)
     edges: list[GraphEdge] = Field(default_factory=list)
     suspicious_edges: list[GraphEdge] = Field(default_factory=list)
     warning: str | None = None
@@ -280,6 +292,9 @@ class AccountAnalysisResponse(BaseModel):
     classification: SubjectLabel
     band: TriageBand
     threat_score: float = Field(ge=0.0, le=1.0)
+    network_architecture: Literal["centralized", "decentralized_federated"] = "centralized"
+    architecture_confidence: float = Field(default=1.0, ge=0.0, le=1.0)
+    architecture_attack_profile: str = "Algorithmic Retweet Ring"
     reasons: list[str] = Field(default_factory=list)
     text: ThreadReport
     network: NetworkReport

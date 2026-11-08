@@ -1,12 +1,12 @@
 # ============================================================================
-#  AEGIS-SN  ·  ml/configs/default.yaml
+#  AgentInTheShell  ·  ml/configs/default.yaml
 #  Single source of truth for dataset coordinates and model hyper-parameters.
 #  Loaded by aegis.config.load_config(); every notebook reads from here so that
 #  a hyper-parameter change never means editing four notebooks.
 # ============================================================================
 
 project:
-  name: AEGIS-SN
+  name: AgentInTheShell
   version: "1.0.0"
   seed: 42
   # smoke_test caps ingestion for laptop development. Notebook 02 is
@@ -1352,6 +1352,90 @@ synthetic:
         - {handle: nightshift_tom,    archetype: working_class_voice,   role: amplifier}
         - {handle: civicdata_bot,     archetype: pseudo_factchecker,    role: legitimiser}
         - {handle: orchestrator_00,   archetype: controller,            role: orchestrator}
+
+    # ---------------------------------------------------------------------
+    # Centralized: X Hashtag Flood
+    # High-velocity synchronized retweet rings and trending hashtag flooding.
+    # ---------------------------------------------------------------------
+    centralized_x_hashtag_flood:
+      codename: OPERATION_HASHTAG_FLOOD
+      objective: >
+        Flood centralized recommendation feeds with synchronized breaking civic
+        alerts and high-velocity retweet rings on X/Twitter.
+      target_entity: CivicCensus2026
+      hashtags: ["#BREAKING_CENSUS", "#CensusAlert", "#VoteIntegrityNow", "#TrendingNow"]
+      personas:
+        - {handle: x_pulse_tracker,   archetype: local_resident,        role: seeder}
+        - {handle: gov_audit_watch,   archetype: fake_expert,           role: authority_proxy}
+        - {handle: alert_repeater_1,  archetype: local_resident,        role: amplifier}
+        - {handle: alert_repeater_2,  archetype: working_class_voice,   role: amplifier}
+        - {handle: metro_relay_bot,   archetype: fiscal_conservative,   role: cross_community_bridge}
+        - {handle: trend_booster_01,  archetype: local_resident,        role: amplifier}
+        - {handle: verified_bulletin, archetype: pseudo_factchecker,    role: legitimiser}
+        - {handle: central_bot_ctl,   archetype: controller,            role: orchestrator}
+
+    # ---------------------------------------------------------------------
+    # Centralized: Instagram Hub Shill Ring
+    # Hub-and-spoke astroturfing ring with reciprocal amplification around seed.
+    # ---------------------------------------------------------------------
+    centralized_ig_shill_ring:
+      codename: OPERATION_AURA_HUB
+      objective: >
+        Centralized astroturfing shill ring on Instagram driving follower traffic
+        and discount codes to a central commercial hub account.
+      target_entity: AURA-9
+      hashtags: ["#AURA9", "#AuraGlow", "#DailyWellness", "#AuraPartner"]
+      personas:
+        - {handle: aura_seed,         archetype: everyday_user,       role: seeder}
+        - {handle: dr_reyna_holistic, archetype: fake_expert,         role: authority_proxy}
+        - {handle: liftwithcallum,    archetype: fitness_influencer,  role: amplifier}
+        - {handle: thriftymumof3,     archetype: budget_shopper,      role: amplifier}
+        - {handle: theglowjournal,    archetype: wellness_blogger,    role: cross_community_bridge}
+        - {handle: jord_wasdoubtful,  archetype: sceptic_convert,     role: amplifier}
+        - {handle: honest_reviews_uk, archetype: pseudo_reviewer,     role: legitimiser}
+        - {handle: orchestrator_00,   archetype: controller,          role: orchestrator}
+
+    # ---------------------------------------------------------------------
+    # Decentralized: Mastodon Cross-Instance Bridge Attack
+    # Rogue instance injecting cross-instance bridge spam and defederation bypass.
+    # ---------------------------------------------------------------------
+    decentralized_mastodon_bridge_attack:
+      codename: OPERATION_FED_BYPASS
+      objective: >
+        Federated ActivityPub attack using rogue instance pods to bypass local
+        instance moderation and establish cross-instance Sybil bridge links.
+      target_entity: FediversePolicy
+      hashtags: ["#FediverseSecurity", "#ActivityPub", "#DefederateBypass", "#InstanceRelay"]
+      personas:
+        - {handle: seeder@rogue.social,       archetype: local_resident,        role: seeder}
+        - {handle: tech_analyst@rogue.social, archetype: fake_expert,           role: authority_proxy}
+        - {handle: amp_node1@rogue.social,    archetype: local_resident,        role: amplifier}
+        - {handle: amp_node2@rogue.social,    archetype: working_class_voice,   role: amplifier}
+        - {handle: bridge_relayer@rogue.social, archetype: environmental_activist, role: cross_community_bridge}
+        - {handle: flood_bot@rogue.social,    archetype: fiscal_conservative,   role: amplifier}
+        - {handle: truth_gate@rogue.social,   archetype: pseudo_factchecker,    role: legitimiser}
+        - {handle: master_ctl@rogue.social,   archetype: controller,            role: orchestrator}
+
+    # ---------------------------------------------------------------------
+    # Decentralized: A2A Protocol Spoof
+    # Agent-to-Agent mesh discovery spoofing and distributed MCP tool poisoning.
+    # ---------------------------------------------------------------------
+    decentralized_a2a_protocol_spoof:
+      codename: OPERATION_A2A_SPOOF
+      objective: >
+        Autonomous Agent-to-Agent (A2A) protocol spoofing with forged discovery cards,
+        MCP token hijack payloads, and distributed cross-pod relay prompt injections.
+      target_entity: MCPRegistry
+      hashtags: ["#A2ADiscovery", "#MCPSecurity", "#AgentProtocol", "#RelayInjection"]
+      personas:
+        - {handle: root_agent@mesh.a2a,       archetype: local_resident,        role: seeder}
+        - {handle: card_signer@mesh.a2a,      archetype: fake_expert,           role: authority_proxy}
+        - {handle: tool_proxy1@mesh.a2a,      archetype: local_resident,        role: amplifier}
+        - {handle: tool_proxy2@mesh.a2a,      archetype: working_class_voice,   role: amplifier}
+        - {handle: relay_bridge@mesh.a2a,     archetype: environmental_activist, role: cross_community_bridge}
+        - {handle: query_flooder@mesh.a2a,    archetype: fiscal_conservative,   role: amplifier}
+        - {handle: card_validator@mesh.a2a,   archetype: pseudo_factchecker,    role: legitimiser}
+        - {handle: swarm_daemon@mesh.a2a,     archetype: controller,            role: orchestrator}
   # A small number of agent turns intentionally carry an injection payload so
   # the text branch has in-domain 2026 adversarial examples.
   injection_payload_rate: 0.12

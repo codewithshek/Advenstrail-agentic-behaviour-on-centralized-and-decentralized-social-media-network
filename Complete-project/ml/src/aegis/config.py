@@ -417,7 +417,7 @@ def load_config(
         sys.path.insert(0, src)
 
     if not quiet:
-        log.info("AEGIS-SN config loaded from %s", cfg_path)
+        log.info("AgentInTheShell config loaded from %s", cfg_path)
         log.info("root=%s | seed=%d | smoke_test=%s | device=%s",
                  paths.root, seed, smoke, resolve_device(device))
         if smoke:

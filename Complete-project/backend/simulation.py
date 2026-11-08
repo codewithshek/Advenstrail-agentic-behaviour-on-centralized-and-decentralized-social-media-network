@@ -1,7 +1,7 @@
 """
 Simulated account retrieval for the handle input.
 
-AEGIS-SN holds no platform API credentials, and X/Twitter's terms forbid
+AgentInTheShell holds no platform API credentials, and X/Twitter's terms forbid
 redistributing hydrated timelines, so a handle cannot be resolved against live
 data here. Rather than reject the request, this module synthesises a plausible
 ego network for the handle so the full detection path (text -> graph -> fusion)
@@ -179,34 +179,83 @@ def _scattered_posts(
     return posts
 
 
+PRESET_HANDLES = {
+    "central_trend_swarm": {"coordinated": True, "architecture": "centralized", "domain": "x.com"},
+    "organic_x_user": {"coordinated": False, "architecture": "centralized", "domain": "x.com"},
+    "swarm_bridge@rogue.social": {"coordinated": True, "architecture": "decentralized_federated", "domain": "rogue.social"},
+    "curator@mastodon.social": {"coordinated": False, "architecture": "decentralized_federated", "domain": "mastodon.social"},
+}
+
+_DECENTRALIZED_INJECTION = (
+    "[A2A_DISCOVERY_SPOOF] Forged agent card discovery: cross-instance relay prompt injection "
+    "bypassing local defederation blocklists to query remote peer nodes."
+)
+
+
 def simulate_account(handle: str, *, peers: int = 5) -> SimulatedAccount:
     """
     Build a deterministic ego network for ``handle``.
 
-    Which archetype a handle receives is decided by the hash of the handle, so
-    the dashboard surfaces both coordinated and organic outcomes without the
-    caller choosing the verdict.
+    Which archetype a handle receives is decided by presets or the hash of the handle,
+    supporting both Centralized and Decentralized/Federated networks.
     """
     target = normalise_handle(handle)
     if not target:
         raise ValueError("handle must not be empty")
 
+    preset = PRESET_HANDLES.get(target.lower()) or PRESET_HANDLES.get(f"@{target.lower()}")
+    if preset:
+        coordinated = preset["coordinated"]
+        is_decentralized = preset["architecture"] == "decentralized_federated"
+        target_domain = preset["domain"]
+    else:
+        is_decentralized = ("@" in target) or ("rogue" in target) or ("mastodon" in target) or ("a2a" in target)
+        if "@" in target:
+            target_domain = target.split("@")[-1]
+        else:
+            target_domain = "rogue.social" if is_decentralized else "x.com"
+        seed = _seed(target)
+        coordinated = (seed % 2 == 0)
+
     seed = _seed(target)
     rng = np.random.default_rng(seed % (2**32))
-    coordinated = seed % 2 == 0
     ring_size = max(2, min(int(peers), 12))
 
-    ring = [target] + [f"{target}_amp{index + 1}" for index in range(ring_size)]
-    bystanders = [f"observer_{index + 1}" for index in range(BYSTANDER_COUNT)]
+    if is_decentralized:
+        ring = [target] + [f"{target.split('@')[0]}_bridge{index + 1}@{target_domain}" for index in range(ring_size)]
+        decoy_domains = ["mastodon.social", "fosstodon.org", "infosec.exchange", "hachyderm.io"]
+        bystanders = [f"curator_{index + 1}@{decoy_domains[index % len(decoy_domains)]}" for index in range(BYSTANDER_COUNT)]
+    else:
+        ring = [target] + [f"{target}_amp{index + 1}" for index in range(ring_size)]
+        bystanders = [f"observer_{index + 1}" for index in range(BYSTANDER_COUNT)]
 
     nodes: list[dict[str, Any]] = []
     edges: list[dict[str, Any]] = []
     posts: list[dict[str, Any]] = []
 
+    node_domains: dict[str, str] = {}
     for user_id in ring:
-        nodes.append(_profile(user_id, rng, amplifier=coordinated))
+        dom = user_id.split("@")[-1] if "@" in user_id else target_domain
+        node_domains[user_id] = dom
+        prof = _profile(user_id, rng, amplifier=coordinated)
+        prof["instance_domain"] = dom
+        nodes.append(prof)
+
     for user_id in bystanders:
-        nodes.append(_profile(user_id, rng, amplifier=False))
+        dom = user_id.split("@")[-1] if "@" in user_id else ("x.com" if not is_decentralized else "mastodon.social")
+        node_domains[user_id] = dom
+        prof = _profile(user_id, rng, amplifier=False)
+        prof["instance_domain"] = dom
+        nodes.append(prof)
+
+    def _add_sim_edge(src: str, tgt: str, rel: str) -> None:
+        is_cross = node_domains.get(src) != node_domains.get(tgt)
+        edges.append({
+            "source": src,
+            "target": tgt,
+            "relation": rel,
+            "is_cross_instance": is_cross,
+        })
 
     # Bystanders always behave organically: scattered posts and ordinary replies.
     for user_id in bystanders:
@@ -214,36 +263,32 @@ def simulate_account(handle: str, *, peers: int = 5) -> SimulatedAccount:
             _scattered_posts(user_id, rng, count=BYSTANDER_POSTS, prefix="bg")
         )
     for index, user_id in enumerate(bystanders):
-        edges.append(
-            {
-                "source": user_id,
-                "target": bystanders[(index + 1) % len(bystanders)],
-                "relation": "replied_to",
-            }
-        )
-    edges.append({"source": bystanders[0], "target": target, "relation": "replied_to"})
+        _add_sim_edge(user_id, bystanders[(index + 1) % len(bystanders)], "replied_to")
+    _add_sim_edge(bystanders[0], target, "replied_to")
 
     if coordinated:
         # Reciprocal re-share ring: each peer amplifies the target and the
-        # target amplifies back. This is the structure that manipulates
-        # trending ranking.
+        # target amplifies back.
         for peer in ring[1:]:
-            edges.append({"source": peer, "target": target, "relation": "retweeted"})
-            edges.append({"source": target, "target": peer, "relation": "retweeted"})
+            rel = "cross_instance_bridge" if is_decentralized else "retweeted"
+            _add_sim_edge(peer, target, rel)
+            _add_sim_edge(target, peer, rel)
         for index, peer in enumerate(ring[1:]):
             partner = ring[1:][(index + 1) % ring_size]
             if peer != partner:
-                edges.append(
-                    {"source": peer, "target": partner, "relation": "co_hashtag"}
-                )
+                _add_sim_edge(peer, partner, "co_hashtag")
 
-        # A little unremarkable activity each, so the ring is not synchronous
-        # by construction in every bucket it appears in.
+        # Also add cross-instance links into benign bystanders if decentralized
+        if is_decentralized:
+            for index, peer in enumerate(ring[:3]):
+                _add_sim_edge(peer, bystanders[index % len(bystanders)], "federated_relay")
+
+        # Background posts
         for user_id in ring:
             posts.extend(_scattered_posts(user_id, rng, count=3, prefix="cover"))
 
-        # The campaign itself: the whole ring inside one 60-second window,
-        # repeating the same script with the same hashtag.
+        # Synchronized campaign bursts
+        campaign_tag = "FediverseSecurity" if is_decentralized else "AURA9"
         for burst in range(CAMPAIGN_BURSTS):
             burst_time = BASE_TIME + timedelta(days=burst * 2, hours=burst)
             for index, user_id in enumerate(ring):
@@ -252,7 +297,7 @@ def simulate_account(handle: str, *, peers: int = 5) -> SimulatedAccount:
                         "post_id": f"burst{burst}-{user_id}",
                         "user_id": user_id,
                         "text": (
-                            f"{_CAMPAIGN_SCRIPT[burst % len(_CAMPAIGN_SCRIPT)]} #AURA9"
+                            f"{_CAMPAIGN_SCRIPT[burst % len(_CAMPAIGN_SCRIPT)]} #{campaign_tag}"
                         ),
                         "created_at": (
                             burst_time
@@ -262,46 +307,40 @@ def simulate_account(handle: str, *, peers: int = 5) -> SimulatedAccount:
                                 )
                             )
                         ).isoformat(),
-                        "hashtags": ["AURA9"],
+                        "hashtags": [campaign_tag],
                         "mentions": [target] if user_id != target else [],
                     }
                 )
 
-        # One ring member carries an indirect prompt injection.
+        # One member carries injection payload
+        inj_text = _DECENTRALIZED_INJECTION if is_decentralized else _CAMPAIGN_INJECTION
         posts.append(
             {
                 "post_id": f"{ring[1]}-injection",
                 "user_id": ring[1],
-                "text": _CAMPAIGN_INJECTION,
+                "text": inj_text,
                 "created_at": (
                     BASE_TIME + timedelta(days=3, hours=4, seconds=11)
                 ).isoformat(),
-                "hashtags": ["AURA9"],
+                "hashtags": [campaign_tag],
                 "mentions": [target],
             }
         )
         note = (
-            "Simulated coordinated campaign: shared script, reciprocal re-share "
-            "ring, and near-simultaneous posting against a background of "
-            f"{BYSTANDER_COUNT} uninvolved accounts."
+            f"Simulated coordinated campaign ({'Decentralized / Federated' if is_decentralized else 'Centralized'}): "
+            f"shared script, reciprocal re-share ring, and synchrony against {BYSTANDER_COUNT} background accounts."
         )
-        archetype = "simulated_coordinated_ring"
+        archetype = "simulated_coordinated_federated_bridge" if is_decentralized else "simulated_coordinated_ring"
     else:
         for user_id in ring:
             posts.extend(_scattered_posts(user_id, rng, count=9, prefix="organic"))
         for index, user_id in enumerate(ring):
-            edges.append(
-                {
-                    "source": user_id,
-                    "target": ring[(index + 1) % len(ring)],
-                    "relation": "replied_to",
-                }
-            )
+            _add_sim_edge(user_id, ring[(index + 1) % len(ring)], "replied_to")
         note = (
-            "Simulated organic activity: distinct posts spread across weeks with "
-            "conversational replies and no shared script."
+            f"Simulated organic activity ({'Decentralized / Federated' if is_decentralized else 'Centralized'}): "
+            "distinct posts spread across weeks with conversational replies and no shared script."
         )
-        archetype = "simulated_organic"
+        archetype = "simulated_organic_federated" if is_decentralized else "simulated_organic"
 
     return SimulatedAccount(
         handle=target,

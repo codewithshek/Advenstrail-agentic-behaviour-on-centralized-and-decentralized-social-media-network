@@ -1,8 +1,10 @@
-"""HTTP routes for AEGIS-SN inference and analyst dashboard data."""
+"""HTTP routes for AgentInTheShell inference and analyst dashboard data."""
 
 from __future__ import annotations
 
-from typing import Annotated
+import json
+from pathlib import Path
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
@@ -32,7 +34,7 @@ DashboardLimit = Annotated[int, Query(ge=1, le=100)]
 
 @router.get("/health")
 def health() -> dict[str, str]:
-    return {"status": "ok", "service": "aegis-sn"}
+    return {"status": "ok", "service": "AgentInTheShell"}
 
 
 @router.post("/analyze_text", response_model=TextAnalysisResponse)
@@ -173,3 +175,58 @@ def get_threat_dashboard(
         for row in summary.pop("recent")
     ]
     return ThreatDashboardResponse(**summary, recent=recent)
+
+
+FIXTURES_DIR = Path(__file__).resolve().parents[1] / "datasets" / "fixtures"
+
+
+@router.get("/architecture_presets")
+def get_architecture_presets() -> list[dict[str, Any]]:
+    """Return the 4 preloaded Centralized and Decentralized fixture datasets."""
+    presets: list[dict[str, Any]] = []
+    fixture_order = [
+        (
+            "centralized_x_hashtag_flood",
+            "Centralized: X Hashtag Flood",
+            "centralized",
+            "Synchronized Hashtag Flood",
+        ),
+        (
+            "centralized_ig_shill_ring",
+            "Centralized: Hub Shill Ring",
+            "centralized",
+            "Algorithmic Retweet Ring",
+        ),
+        (
+            "decentralized_mastodon_bridge_attack",
+            "Decentralized: Mastodon Cross-Instance Bridge",
+            "decentralized_federated",
+            "Cross-Instance Sybil Bridge Attack",
+        ),
+        (
+            "decentralized_a2a_protocol_spoof",
+            "Decentralized: A2A Protocol Spoof",
+            "decentralized_federated",
+            "A2A/MCP Protocol Discovery Spoof",
+        ),
+    ]
+    for fid, name, arch, attack_mode in fixture_order:
+        json_file = FIXTURES_DIR / f"{fid}.json"
+        if json_file.exists():
+            try:
+                import json
+                with open(json_file, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                presets.append({
+                    "id": fid,
+                    "name": name,
+                    "architecture": arch,
+                    "attack_mode": attack_mode,
+                    "metadata": data.get("metadata", {}),
+                    "nodes": data.get("nodes", []),
+                    "edges": data.get("edges", []),
+                    "posts": data.get("posts", []),
+                })
+            except Exception:
+                continue
+    return presets

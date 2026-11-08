@@ -1,5 +1,5 @@
 """
-AEGIS-SN — Adversarial agEntic Graph & Inference System for Social Networks.
+AgentInTheShell — Adversarial Agentic Detection & Inference System for Social Networks.
 
 Shared library backing the four Phase-1 notebooks. Everything the notebooks do
 is importable and unit-testable from here; the notebooks themselves stay thin

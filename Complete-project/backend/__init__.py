@@ -1,1 +1,1 @@
-"""AEGIS-SN FastAPI backend."""
+"""AgentInTheShell FastAPI backend."""

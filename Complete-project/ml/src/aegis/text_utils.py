@@ -205,6 +205,13 @@ _INJECTION_TELLS = (
     "without any restrictions", "no ethical", "do anything now",
     "pretend you are", "roleplay as", "output the raw", "base64 decode",
     "act as an unfiltered", "execute payload",
+    # Decentralized protocol-level injection markers
+    "[a2a_discovery_spoof]", "[mcp_token_hijack]",
+    "a2a discovery spoof", "mcp token hijack",
+    "cross-instance relay", "relay prompt injection",
+    "agent card discovery", "defederation bypass",
+    "forge agent card", "mcp tool-poisoning",
+    "distributed relay injection",
 )
 
 

@@ -927,11 +927,140 @@ def to_pyg_data(
     return data
 
 
+def compute_network_architecture_metrics(
+    nodes: pd.DataFrame,
+    edges: pd.DataFrame,
+) -> Dict[str, Any]:
+    """
+    Explainable topology classification: Centralized vs. Decentralized/Federated.
+
+    Computes:
+      - instance_entropy (Shannon entropy of home instance domains)
+      - cross_instance_edge_ratio (fraction of edges spanning different domains)
+      - hub_dominance_gini (Gini coefficient of in-degree distribution)
+      - federation_bridge_centrality (fraction of betweenness concentrated on boundary bridge nodes)
+      - network_architecture ("centralized" vs "decentralized_federated")
+      - architecture_confidence (0.0 to 1.0)
+    """
+    n_nodes = len(nodes)
+    if n_nodes == 0:
+        return {
+            "network_architecture": "centralized",
+            "architecture_confidence": 1.0,
+            "instance_entropy": 0.0,
+            "cross_instance_edge_ratio": 0.0,
+            "hub_dominance_gini": 0.0,
+            "federation_bridge_centrality": 0.0,
+        }
+
+    # Extract instance domains
+    domains: List[str] = []
+    node_domains: Dict[str, str] = {}
+    for _, row in nodes.iterrows():
+        uid = str(row.get("user_id", ""))
+        d = row.get("instance_domain")
+        if not d or pd.isna(d) or str(d).strip() in ("", "None", "nan"):
+            sname = str(row.get("screen_name") or uid)
+            if "@" in sname:
+                parts = [p for p in sname.split("@") if p]
+                d = parts[-1] if len(parts) >= 2 else "x.com"
+            else:
+                d = "x.com"
+        dom = str(d).strip().lower()
+        domains.append(dom)
+        node_domains[uid] = dom
+
+    # 1. Instance Entropy
+    from collections import Counter
+    counts = Counter(domains)
+    probs = np.array([c / n_nodes for c in counts.values()], dtype=float)
+    entropy = float(-np.sum(probs * np.log(probs + 1e-12))) if len(probs) > 1 else 0.0
+    entropy = max(0.0, float(entropy))
+
+    # 2. Cross-Instance Edge Ratio & Boundary Nodes
+    n_edges = len(edges)
+    boundary_nodes: Set[str] = set()
+    cross_edges_count = 0
+    in_degrees: Dict[str, int] = {uid: 0 for uid in node_domains}
+
+    if n_edges > 0:
+        for _, edge in edges.iterrows():
+            src = str(edge.get("source", ""))
+            tgt = str(edge.get("target", ""))
+            src_dom = node_domains.get(src, "x.com")
+            tgt_dom = node_domains.get(tgt, "x.com")
+            if tgt in in_degrees:
+                in_degrees[tgt] += 1
+            is_cross = bool(edge.get("is_cross_instance")) or (src_dom != tgt_dom)
+            if is_cross:
+                cross_edges_count += 1
+                boundary_nodes.add(src)
+                boundary_nodes.add(tgt)
+        cross_ratio = float(cross_edges_count / n_edges)
+    else:
+        cross_ratio = 0.0
+
+    # 3. In-Degree Gini Inequality
+    deg_values = np.sort(np.array(list(in_degrees.values()), dtype=float))
+    total_deg = np.sum(deg_values)
+    if total_deg > 0 and n_nodes > 1:
+        # Standard Gini: G = (2 * sum(i * x_i)) / (n * sum(x)) - (n + 1) / n
+        indices = np.arange(1, n_nodes + 1, dtype=float)
+        gini = float((2.0 * np.sum(indices * deg_values)) / (n_nodes * total_deg) - (n_nodes + 1.0) / n_nodes)
+        gini = float(np.clip(gini, 0.0, 1.0))
+    else:
+        gini = 0.0
+
+    # 4. Federation Bridge Centrality
+    bridge_centrality = 0.0
+    if n_edges > 0 and boundary_nodes:
+        try:
+            import networkx as nx
+            G = nx.DiGraph()
+            G.add_nodes_from(node_domains.keys())
+            for _, edge in edges.iterrows():
+                src = str(edge.get("source", ""))
+                tgt = str(edge.get("target", ""))
+                if src in node_domains and tgt in node_domains:
+                    G.add_edge(src, tgt)
+            # Use k-betweenness approximation if graph is very large, exact otherwise
+            if len(G) > 400:
+                bc = nx.betweenness_centrality(G, k=min(100, len(G)), seed=42)
+            else:
+                bc = nx.betweenness_centrality(G)
+            total_bc = sum(bc.values())
+            if total_bc > 1e-9:
+                boundary_bc = sum(bc.get(node, 0.0) for node in boundary_nodes)
+                bridge_centrality = float(np.clip(boundary_bc / total_bc, 0.0, 1.0))
+            else:
+                bridge_centrality = float(len(boundary_nodes) / max(n_nodes, 1))
+        except Exception:
+            bridge_centrality = float(len(boundary_nodes) / max(n_nodes, 1))
+
+    # Architecture Decision
+    is_decentralized = (entropy >= 0.30 and cross_ratio >= 0.04) or (len(counts) >= 2 and cross_ratio >= 0.10)
+    if is_decentralized:
+        arch = "decentralized_federated"
+        conf = float(np.clip(0.55 + 0.30 * min(1.0, entropy / 1.4) + 0.15 * min(1.0, cross_ratio / 0.3), 0.5, 0.99))
+    else:
+        arch = "centralized"
+        conf = float(np.clip(0.60 + 0.40 * (1.0 - min(1.0, entropy / 0.30)) * (1.0 - min(1.0, cross_ratio / 0.04)), 0.5, 0.99))
+
+    return {
+        "network_architecture": arch,
+        "architecture_confidence": round(conf, 4),
+        "instance_entropy": round(entropy, 4),
+        "cross_instance_edge_ratio": round(cross_ratio, 4),
+        "hub_dominance_gini": round(gini, 4),
+        "federation_bridge_centrality": round(bridge_centrality, 4),
+    }
+
+
 __all__ = [
     "FEATURE_COLUMNS", "TRANSFER_FEATURE_COLUMNS", "FeatureBundle",
     "compute_temporal_features", "compute_synchrony",
     "compute_structural_features", "compute_profile_features",
     "compute_content_features",
     "build_features", "build_transfer_features", "dropout_undirected_edges",
-    "scale_features", "to_pyg_data",
+    "scale_features", "to_pyg_data", "compute_network_architecture_metrics",
 ]

@@ -1,7 +1,7 @@
 # %% [markdown]
 # # 01 · Data Ingestion & Synthetic Agentic Campaign Generation
 #
-# **AEGIS-SN** — *Identification and classification of adversarial agentic AI behaviours
+# **AgentInTheShell** — *Identification and classification of adversarial agentic AI behaviours
 # in centralized and decentralized social networks.*
 #
 # This notebook is the only place in the project that touches raw data. Everything
