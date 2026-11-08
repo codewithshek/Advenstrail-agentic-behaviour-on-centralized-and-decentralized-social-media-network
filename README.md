@@ -179,8 +179,13 @@ Complete-project/
 ├── frontend/
 │   ├── index.html
 │   │   └── Static Three.js/GSAP landing page.
+│   ├── editions.html
+│   │   └── Standalone Shopify Editions Winter ’26 style showcase with dual-topology canvas & bento cards.
 │   └── dashboard.html
 │       └── Static analyst console; parses uploads, calls FastAPI, renders D3.
+│
+├── GLOSSARY.md
+│   └── Canonical domain definitions for Centralized vs. Decentralized network concepts.
 │
 ├── backend/
 │   ├── __init__.py
@@ -808,8 +813,9 @@ cd frontend
 
 Open:
 
-- landing page: <http://127.0.0.1:5173/>
+- Winter ’26 Editions showcase: <http://127.0.0.1:5173/editions.html>
 - analyst console: <http://127.0.0.1:5173/dashboard.html>
+- 3D landing page: <http://127.0.0.1:5173/>
 - API documentation: <http://127.0.0.1:8000/docs>
 - health check: <http://127.0.0.1:8000/health>
 
