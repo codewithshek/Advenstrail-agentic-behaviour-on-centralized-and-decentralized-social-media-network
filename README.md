@@ -145,12 +145,19 @@ flowchart LR
 - Binary text classification: `human_benign` or `adversarial`.
 - Subject classification: `human`, `simple_spambot`, or
   `coordinated_ai_agent_swarm`.
-- Per-post and per-thread analysis with exact XAI trigger spans.
+- Network architecture classification: `centralized` vs. `decentralized_federated` with confidence score.
+- Architecture-specific threat profiling:
+  - *Centralized*: Algorithmic Retweet Ring, Synchronized Hashtag Flood, Central Hub Reply-Hijack, Direct Prompt Injection.
+  - *Decentralized*: Cross-Instance Sybil Bridge Attack, Federation Moderation Bypass, A2A/MCP Protocol Discovery Spoof, Distributed Relay Prompt Injection.
+- Structural topology telemetry: Instance Domain Entropy ($H_{\text{instance}}$), Cross-Instance Edge Ratio ($R_{\text{cross}}$), In-Degree Gini ($G_{\text{in}}$), and Federation Bridge Centrality ($C_{\text{bridge}}$).
+- Per-post and per-thread analysis with exact XAI trigger spans (including protocol-level injection tokens).
 - Directed multi-relation network analysis for up to 10,000 nodes and 100,000
   edges/posts per API request.
 - Temporal synchrony, reciprocity, clustering, burstiness, entropy, circadian,
   duplication, and hashtag-overlap measurements.
 - Louvain communities for visualization; communities do not determine labels.
+- Dual-mode D3 topology rendering: concentric radial rings for centralized influencer hubs vs. translucent convex hulls and animated bridge links for federated instances.
+- Side-by-side architecture comparison matrix in the analyst dashboard.
 - Inductive GraphSAGE inference with Random Forest as the explicit artifact
   fallback.
 - Transfer-performance trust gate: graph probabilities are reference-only if
@@ -179,13 +186,8 @@ Complete-project/
 ├── frontend/
 │   ├── index.html
 │   │   └── Static Three.js/GSAP landing page.
-│   ├── editions.html
-│   │   └── Standalone Shopify Editions Winter ’26 style showcase with dual-topology canvas & bento cards.
 │   └── dashboard.html
 │       └── Static analyst console; parses uploads, calls FastAPI, renders D3.
-│
-├── GLOSSARY.md
-│   └── Canonical domain definitions for Centralized vs. Decentralized network concepts.
 │
 ├── backend/
 │   ├── __init__.py
@@ -813,9 +815,8 @@ cd frontend
 
 Open:
 
-- Winter ’26 Editions showcase: <http://127.0.0.1:5173/editions.html>
+- landing page: <http://127.0.0.1:5173/>
 - analyst console: <http://127.0.0.1:5173/dashboard.html>
-- 3D landing page: <http://127.0.0.1:5173/>
 - API documentation: <http://127.0.0.1:8000/docs>
 - health check: <http://127.0.0.1:8000/health>
 
